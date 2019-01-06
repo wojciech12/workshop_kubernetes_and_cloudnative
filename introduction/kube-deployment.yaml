@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: intro-app
+  labels:
+    app: intro-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: intro-app
+  template:
+    metadata:
+      labels:
+        app: intro-app
+    spec:
+      containers:
+      - name: app
+        image: wojciech11/api-status:1.0.0
+        ports:
+        - containerPort: 80

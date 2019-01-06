@@ -1,0 +1,893 @@
+\documentclass[12pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{enumerate}
+\usepackage{listings}
+\usepackage{fancyvrb}
+\usepackage[document]{ragged2e} % keep all left
+
+\usepackage{minted} % yaml syntax highlighting
+
+\newenvironment{markdown}%
+    {\VerbatimEnvironment\begin{VerbatimOut}{tmp.markdown}}%
+    {\end{VerbatimOut}%
+        \immediate\write18{pandoc tmp.markdown -t latex -o tmp.tex}%
+        \input{tmp.tex}}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\newcommand*{\email}[1]{\href{mailto:#1}{\nolinkurl{#1}} } 
+
+\title{Kubernetes Introduction Workshop\\Golang Warsaw Meetup\\ { \small \href{https://creativecommons.org/licenses/by/2.0/}{CC BY 2.0} }  }
+\author{Wojciech Barczynski (wbarczynski.pro@gmail.com)}
+\date{}
+
+
+\begin{document}
+
+\begin{titlepage}
+\maketitle
+\end{titlepage}
+
+\tableofcontents
+\pagebreak
+\section{Prerequiments}
+
+You need to feel good with Command Line Interface. You should understand what Docker is.
+
+\begin{itemize}%
+\item Workstation with Linux or OSX recommeded.%
+\item Software \begin{itemize}%
+    \item Minikube
+    \item Kubernetes CLI
+    \item Docker
+    \end{itemize}%
+\item Tools \begin{itemize}%
+    \item \href{https://stedolan.github.io/jq/}{jq}%
+    \end{itemize}
+\item Good to have \begin{itemize}%
+    \item hub.docker.com account or alternative docker repository
+    \end{itemize}
+\end{itemize}
+
+\subsection{HowTos}
+
+\begin{markdown}
+- [Install Minikube at kubernetes.io](https://kubernetes.io/docs/tasks/tools/install-minikube/)
+- [Install Kubernetes CLI - kubectl at kubernetes.io](https://kubernetes.io/docs/tasks/tools/install-minikube/)
+\end{markdown}
+
+\subsection{Verify the setup}
+
+\begin{verbatim}
+$ minikube status
+$ minikube start
+\end{verbatim}
+
+\begin{verbatim}
+$ kubectl config use-context minikube
+$ kubectl get nodes
+
+NAME       STATUS   ROLES    AGE   VERSION
+minikube   Ready    master    6d   v1.12.4
+\end{verbatim}
+
+
+\subsection{Kubernetes CLI Basics}
+
+Let's learn first some basics regarding the \textit{kubectl}:
+
+\begin{verbatim}
+kubectl get <ARTIFACT>
+kubectl describe <ARTIFACT>
+\end{verbatim}
+
+\bigskip
+1. List the nodes
+
+\begin{verbatim}
+kubectl get nodes
+\end{verbatim}
+
+What the names of our nodes are? . . .
+
+\bigskip
+2. Learn about the node
+
+\begin{verbatim}
+kubectl get nodes minikube
+
+# notice:
+kubectl get no minikube
+kubectl get node minikube
+\end{verbatim}
+
+\bigskip
+3. Get more details: 
+
+\begin{lstlisting}
+kubectl describe nodes minikube
+\end{lstlisting}
+
+Note down:
+\begin{itemize}
+    \item Container Runtime Verison: . . .
+    \item  What the namespaces we have: . . .
+    \item  Note down name of two pods:\begin{itemize}
+        \item . . .
+        \item . . .
+     \end{itemize}
+\end{itemize}
+
+\bigskip
+4. YAML and JSON output
+
+\begin{verbatim}
+kubectl get node minikube -o yaml
+kubectl get node minikube -o json
+\end{verbatim}
+
+Use \textit{jq} to get the \textit{kubeletVersion}, write down below:
+\\
+
+   . . .
+
+\bigskip
+5. Notice jsonpath support
+
+\begin{verbatim}
+kubectl get node minikube \
+  -o jsonpath="{.status.daemonEndpoints.kubeletEndpoint.Port}"
+\end{verbatim}
+
+\begin{verbatim}
+kubectl get node minikube -o jsonpath="{.metadata.labels}"
+\end{verbatim}
+
+Write down a command with jsonpath to get information on how many CPU we have allocated to our minikube:
+\\
+
+   . . .
+
+
+\bigskip
+6. Select with labels
+
+\begin{verbatim}
+kubectl get nodes  -l 'kubernetes.io/hostname'=minikube
+\end{verbatim}
+
+Please find another label, you could select our node and run the command.
+
+
+\bigskip
+7. Select with labels
+\begin{verbatim}
+kubectl api-resources
+\end{verbatim}
+
+\bigskip
+Hints
+
+\begin{markdown}
+- ```kubectx``` and ```kubens``` - https://github.com/ahmetb/kubectx
+- ```alias k=kubectl``` or ```alias kb=kubectl```
+\end{markdown}
+
+%
+%
+%
+\section{Kubectl configuration file}
+
+Good to know. You can find there also your token, certificates, etc.
+
+\bigskip
+1. View ~/.kube/config
+
+\bigskip
+2. Find \textit{certificate-authority}
+
+\bigskip
+3. Note the main sections:
+
+   . . .
+   . . .
+   . . .
+
+%
+%
+%
+\section{Exploring Namespace kube-system}
+
+Let's look around what we have here.
+
+\bigskip
+1. What are the namespaces?
+
+\begin{verbatim}
+$ kubectl get ns
+$ kubectl get namespaces
+\end{verbatim}
+
+Notice:
+\begin{itemize}
+    \item you can create namespaces to better organize your components
+    \item you define resource restrictions for namespaces
+    \item afect the name: \textit{<service-name>.<namespace-name>.svc.cluster.local}. We will talk about it later.
+\end{itemize}
+
+To change the selected namespace for our commands
+
+\begin{verbatim}
+kubectl config set-context \
+  $(kubectl config current-context) \
+  --namespace <namespace-name>
+\end{verbatim}
+
+\bigskip
+2. Get the list of pods in namespace kube-sytem:
+
+\begin{verbatim}
+$ kubectl get po --namespace=kube-system
+$ kubectl get po -n=kube-system
+\end{verbatim}
+
+Use \verb|kubectl describe po <pod-name> --namespace=kube-system| to find what the version is of:
+\begin{itemize}
+    \item kube-proxy: . . .
+    \item apiserver: . . .
+    \item coredns: . . .
+\end{itemize}
+
+\bigskip
+3. Get the list of services:
+
+\begin{verbatim}
+$ kubectl get svc --namespace=kube-system
+\end{verbatim}
+
+Use \verb|kubernetes describe svc <svc-name> --namespace=kube-system| to find the endpoints for:
+\begin{itemize}
+\item kube-dns: . . .
+\item kubernetes-dashboard: . . .
+\end{itemize}
+
+\bigskip
+4. Logs:
+
+\begin{verbatim}
+$ kubectl logs coredns-c4c -n=kube-system
+$ kubectl logs coredns-c4c -n=kube-system -f
+$ kubectl logs coredns-c4c -n=kube-system --tail=10
+\end{verbatim}
+
+Please display logs of:\\
+\verb|kube-apiserver|, \verb|kube-proxy|, \verb|kube-scheduler|, and \verb|etcd-minikube|.
+
+
+Later, we will also cover events:\\
+\texttt{kubectl get events -n=kube-system}.
+
+\bigskip
+5. Get the console:
+
+\begin{verbatim}
+$ kubectl exec -it kube-apiserver-minikube \
+ /bin/sh -n=kube-system
+\end{verbatim}
+
+\bigskip
+6. Kubernetes Dashboard:
+
+\begin{verbatim}
+# on normal deployment:
+# $ kubernetes proxy
+$ minikube dashboard
+\end{verbatim}
+
+\bigskip
+7. Basic metrics:
+
+\begin{verbatim}
+minikube addons enable metrics-server
+
+# wait 5 seconds
+kubectl top nodes
+kubectl top pods
+\end{verbatim}
+
+%
+%
+%
+\pagebreak
+\section{Kubernetes deployments.yaml}
+
+We have been playing around with kube-system, now let's get our service up and running.
+
+\bigskip
+1. Get the deployment file \texttt{introduction/kube-deployment.yaml}:
+
+\inputminted{yaml}{introduction/kube-deployment.yaml}
+
+Notice:
+\begin{itemize}
+\item if your repo is private, you need to define \verb|imagePullSecrets|.
+\item A force pulling image every time: \verb|imagePullPolicy: Always|, helpful during development, do not use in \textbf{production}.
+\end{itemize}
+
+\bigskip
+2. Deploy:
+
+\begin{verbatim}
+$ kubectl create -f introduction/kube-deployment.yaml
+\end{verbatim}
+
+\bigskip
+3. Check:
+
+\begin{verbatim}
+$ kubectl get po
+$ kubectl get po -n default
+\end{verbatim}
+
+\begin{verbatim}
+$ kubectl describe po <POD_NAME>
+\end{verbatim}
+
+\bigskip
+4. To learn about the deployments:
+
+\begin{verbatim}
+$ kubectl get deploy
+$ kubectl get deployment
+\end{verbatim}
+
+\begin{verbatim}
+$ kubectl describe deploy <DEPLOYMENT_NAME>
+\end{verbatim}
+
+What the update strategy do we use?
+
+   . . .
+
+\bigskip
+5. Find the following information:
+\begin{itemize}
+    \item What is the IP of your app pod? . . .
+    \item What is ReplicatSet? . . .
+    \item Ready? . . .
+    \item Restart Count? . . .
+    \item Events? . . .
+\end{itemize}
+
+Notice: the next step are Liveness/Readiness probes.
+
+%
+%
+%
+\pagebreak
+\section{Opening console in your container}
+
+Imagine, we cannot reach our application. Let's check it within the running container.
+
+\bigskip
+1. Get the console:
+
+\begin{verbatim}
+kubectl exec -it intro-app-65d /bin/bash
+\end{verbatim}
+
+Notice: There is an ongoing discussion whether it is the "new" ssh.
+
+\bigskip
+2. Add tool for debugging - curl:
+
+\begin{verbatim}
+apt-get update && apt-get install -qq curl
+\end{verbatim}
+
+\bigskip
+3. Does it work?
+
+\begin{verbatim}
+# does it work?
+curl 127.0.0.1
+
+# can we get outside
+curl -I wbarczynski.pl
+
+# can we reach other services:
+telnet kube-dns.kube-system 53
+\end{verbatim}
+
+\bigskip
+4. Yes, we fix the bug, let's clean up:
+
+\begin{verbatim}
+kubectl delete po intro-app-65db4-...
+\end{verbatim}
+
+
+\begin{verbatim}
+# notice the name change
+kubectl get po
+\end{verbatim}
+
+%
+%
+%
+\section{Port-forwarding}
+
+What If I told you, you can debug your app from your laptop.
+
+\bigskip
+1. Find the port our service listen, check the deployment file.
+
+\bigskip
+2. Setup the port forwarding:
+
+\begin{verbatim}
+kubectl proxy-forward <POD_NAME> 8080:<PORT_NUMBER>
+\end{verbatim}
+
+\bigskip
+3. Use curl to query our app from your local console.
+
+\bigskip
+Let's learn about services and ingresses first, later 
+we see how we can modify our deployment and update the application.
+
+%
+%
+%
+\pagebreak
+\section{Kubernetes Service}
+
+Our factory, I mean the deployment defines how we create our applications as pods. The service, how it is consumed.
+
+\bigskip
+1. Get the service file \texttt{introduction/kube-service.yaml}:
+
+\inputminted{yaml}{introduction/kube-deployment.yaml}
+
+\bigskip
+2. Deploy:
+
+\begin{verbatim}
+$ kubectl create -f introduction/kube-service.yaml
+$ kubectl apply -f introduction/kube-service.yaml
+\end{verbatim}
+
+\bigskip
+3. Check:
+
+\begin{verbatim}
+$ kubectl get svc
+\end{verbatim}
+
+\bigskip
+4. Find out the endpoint IP: . . .
+
+\bigskip
+5. We few types of services:
+
+\begin{markdown}
+- with ClusterIP
+- ClusterIP: None
+- LoadBalanced
+\end{markdown}
+
+\bigskip
+6. Let's access it:
+
+\begin{verbatim}
+export SVC_PORT=$(kubectl get service intro-app \
+    --output='jsonpath="{.spec.ports[0].nodePort}"' \
+    | tr -d '"')
+curl  $(minikube ip):${SVC_PORT}
+\end{verbatim}
+
+Notice: on Azure, AWS, or Google, we would get the loadbalancer created and public IP assigned.
+
+\bigskip
+7. How it works?
+
+\begin{verbatim}
+$ kubectl exec -it intro-app-65db487447-lrhb9 /bin/bash
+
+/# curl intro-app
+/# curl intro-app.default
+/# curl intro-app.default.svc
+
+/# apt-get update && apt-get install dnsutils -qq
+/# # resolve the same host names:
+/# nslookup intro-app
+\end{verbatim}
+
+\bigskip
+8. How it works from other apps?
+
+\begin{verbatim}
+$ kubectl run -i --tty busybox --image=busybox -- sh
+/# curl intro-app
+/#
+/# wget -O- intro-app
+/# wget -O- kubernetes-dashboard.kube-system
+\end{verbatim}
+
+%
+%
+%
+\section{Modyfing kubernetes deployment and service}
+
+Avoid editing files on kubernetes, always modify a yaml and apply the changes.
+
+\bigskip
+1. Change the number of pods running to 2 with:
+
+\begin{verbatim}
+$ kubectl edit deploy
+\end{verbatim}
+
+\begin{verbatim}
+$ kubectl get po
+\end{verbatim}
+
+\bigskip
+2. Change the value of label \verb|me| to your name in the service definition.
+
+\bigskip
+3. Modify the \verb|depoyment.yml| to get 3 running pods, use: \texttt{kubectl apply -f}
+
+\bigskip
+4. Add one more label to service.
+
+\bigskip
+5. What does happen if we add one more selector, apply new vesion of our service:
+
+\begin{minted}{yaml}
+apiVersion: v1
+kind: Service
+metadata:
+  name: intro-app
+  labels:
+    me: wojtek
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    app: intro-app
+    break: the-connection-with-pods
+  type: LoadBalancer
+\end{minted}
+
+Can we connect?
+
+\begin{verbatim}
+curl -I  $(minikube ip):${SVC_PORT}
+\end{verbatim}
+
+What has changed?
+\begin{verbatim}
+kubectl describe svc intro-app
+\end{verbatim}
+
+\bigskip
+Notice: {\large very very very common issue} :D
+
+\bigskip
+6. Fix our service.
+
+%
+%
+%
+\section{Updating service}
+
+Let's update our app from the version \verb|1.0.0| to \verb|2.0.0|:
+
+\bigskip
+1. Change in the deployment file and apply changes.
+
+\bigskip
+2. You can also change it with set image:
+
+\begin{verbatim}
+$ kubectl set image deployment/<CONTAINER_NAME> \
+  <CONTAINER_NAME>=<DOCKER_IMAGE_NAME>:<VERSION>
+\end{verbatim}
+
+\bigskip
+3. Change two times from \verb|1.0.0| to \verb|2.0.0| and back:
+
+\begin{verbatim}
+$ curl -I  $(minikube ip):${SVC_PORT}
+\end{verbatim}
+
+%
+%
+%
+\pagebreak
+\section{Kubernetes Ingress}
+
+\smallskip
+1. Install our ingress-controller:
+
+\begin{verbatim}
+$ kubectl apply -f  introduction/ingress/
+\end{verbatim}
+
+\bigskip
+2. Apply the ingress controller:
+\inputminted{yaml}{introduction/kube-ingress.yaml}
+
+\bigskip
+3. Check:
+
+\begin{verbatim}
+kubectl get ing
+kubectl describe ing <YOUR_ING>
+\end{verbatim}
+
+\bigskip
+4. Use:
+
+\begin{verbatim}
+$ export ING_CNTR_PORT=$(kubectl \
+  get service traefik-ingress-service \
+  -n kube-system \
+  --output='jsonpath="{.spec.ports[0].nodePort}"' \
+    | tr -d '"')
+
+$ export MK_IP=$(minikube ip)
+
+$ curl --header 'Host: my.app'  http://${MK_IP}:${ING_CNTR_PORT}/echo
+
+\end{verbatim}
+
+\bigskip
+5. Open traefik dashboard:
+
+\begin{verbatim}
+kubectl port-forward -n kube-system \
+traefik-ingress-controller-s58cv \
+8080:8080
+\end{verbatim}
+
+\section{Containers vs Pods}
+Please answer the following questions:
+\begin{itemize}
+\item How many containers can a Pod has?
+\item Do containers share disk?
+\item Do container share port space?
+\item What does \verb|1/1| mean in the output of \verb|kubectl get po|?
+\end{itemize}
+
+\bigskip
+\bigskip
+
+\section{Failover}
+
+\bigskip
+1. Open console.
+
+\bigskip
+2. Force restart:
+
+\begin{verbatim}
+# should work
+kill 1
+
+# always works
+kill -9 1
+\end{verbatim}
+
+Repeat 5 times. Observer the output from: \verb|kubectl get po|.
+
+%
+%
+%
+\section{How to debug}
+
+Good to ship a minimum of debugging tools in your container, such as, curl or telnet.
+
+Happy debugging path:
+
+\begin{verbatim}
+kubectl describe ing
+kubectl describe svc
+kubectl exec -it <> /bin/bash
+
+# curl, telnet, ...
+kubectl describe po <>
+\end{verbatim}
+
+\begin{verbatim}
+kubectl logs <>
+kubectl logs <> -f
+kubectl logs <> --tail=100
+\end{verbatim}
+
+\begin{verbatim}
+kubectl logs <YOUR_INGRESS_CONTROLER_POD>
+\end{verbatim}
+
+\begin{verbatim}
+kubectl get events
+\end{verbatim}
+
+%
+%
+%
+\section{Kubernetes configmap}
+
+With configmaps, we can deliver values for environment variables or files. Let's change the page in our application:
+
+\bigskip
+1. Copy \verb|index.html|:
+
+\begin{verbatim}
+cp introduction/dockers/site-1.0.0/index.html index.html
+\end{verbatim}
+
+\bigskip
+2. Add your name after the version number:
+
+\begin{verbatim}
+<html>
+<h1>1.0.0-Maria</h1>
+</html>
+\end{verbatim}
+
+\bigskip
+3. Let's create a configmap:
+
+\begin{verbatim}
+kubectl create cm index-html --from-file index.html
+\end{verbatim}
+
+\bigskip
+4. Check the commands:
+
+\begin{verbatim}
+kubectl describe cm index-html
+kubectl get cm index-html -o yaml
+kubectl get cm index-html -o json
+\end{verbatim}
+
+\bigskip
+5. Let's mount it:
+
+\begin{minted}{yaml}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: intro-app
+  labels:
+    app: intro-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: intro-app
+  template:
+    metadata:
+      labels:
+        app: intro-app
+    spec:
+      containers:
+      - name: app
+        image: wojciech11/api-status:1.0.0
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: "html-content"
+      volumes:
+      - name: html-content
+        configMap:
+          name: index-html
+\end{minted}
+
+\bigskip
+5. Smoke test:
+
+\begin{verbatim}
+
+# 30288 is the port, the ingress-controller is listening:
+curl --header 'Host: my.app'  "http://$(minikube ip):30288/echo"
+\end{verbatim}
+
+%
+%
+%
+\section{Kubernetes secret}
+
+The same as the Kubernetes config, difference, it is stored only on the master nodes. 
+
+%
+%
+%
+\section{Opinioneted Configuration}
+
+\begin{markdown}
+1. envsubst!
+2. Ksonnect
+3. Helm
+\end{markdown}
+
+\section{Kubernetes Persistent Volumes}
+
+A persistence storage that survives your pod being deleted.
+
+TBD: mention about empty{}
+
+\section{Outlook}
+What could be the next steps in learning k8s.
+
+\begin{markdown}
+
+What you could learn next.
+
+Next course *Immediate (Developer)*:
+
+1. Liveness/Readiness probes
+2. Monitoring with Prometheus
+3. Resource and Limits, QoS for your pods, schedule policies
+4. Statefulsets
+5. DaemonSets
+
+*Observability plus* with Istio demo as what might the future be:
+
+1. Monitoring
+2. Logging
+3. Tracibility
+
+*Advance (Developer)*:
+
+1. Zero-downtime deployment strategies
+2. Horizontal scalling (beta: vertical pod scalling for the pets)
+3. Continous Deployment and Integration
+4. TravisCI and Gitlab
+5. (sic :/ ) gitops, have to say few things...
+
+*Network and Security*:
+
+1. RBAC deep dive
+2. Networking - Internal Loadbalancing - https://kubernetes.io/docs/concepts/services-networking/
+3. Egress - https://kubernetes.io/docs/concepts/services-networking/network-policies/
+4. IpBlock
+
+*Kubernetes customization*
+
+1. Write your first CRD
+2. ...
+3. ...
+4. FaaS? Kubeless?
+
+*CloudNative Ecosystem*
+
+1. Observability: Prometheus stack
+2. Observability: EFK
+3. Observability: Tracing
+4. Ingress Controllers: Traefik, ... , talk about standard and controller-specific annotations
+5. Cert-manager
+6. (Traditional) backups with Ark
+7. Operators for etcd and Vault
+
+*More*
+
+1. Istio
+2. Operators for ...
+
+*Optionals*
+
+1. Google Kubernetes Engine - GKE
+2. Azure Kubernetes Service -  AKS
+3. Amazon Elastic Kubernetes - EKS
+
+Contact: \email{wbarczynski.pro@gmail.com}
+\end{markdown}
+
+\end{document}
