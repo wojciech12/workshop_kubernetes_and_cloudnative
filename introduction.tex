@@ -618,14 +618,14 @@ $ curl -I  $(minikube ip):${SVC_PORT}
 \section{Kubernetes Ingress}
 
 \smallskip
-1. Install our ingress-controller:
+1. Install the ingress-controller --- \verb|traefik|:
 
 \begin{verbatim}
-$ kubectl apply -f  introduction/ingress/
+$ kubectl apply -f  introduction/ingress
 \end{verbatim}
 
 \bigskip
-2. Apply the ingress controller:
+2. Apply the ingress configuration for our service - \verb|introduction/kube-ingress.yaml|:
 \inputminted{yaml}{introduction/kube-ingress.yaml}
 
 \bigskip
@@ -637,7 +637,7 @@ kubectl describe ing <YOUR_ING>
 \end{verbatim}
 
 \bigskip
-4. Use:
+4. Let's access our service as our customers would do:
 
 \begin{verbatim}
 $ export ING_CNTR_PORT=$(kubectl \
@@ -653,7 +653,7 @@ $ curl --header 'Host: my.app'  http://${MK_IP}:${ING_CNTR_PORT}/echo
 \end{verbatim}
 
 \bigskip
-5. Open traefik dashboard:
+5. Not everything is CLI --- \verb|traefik| dashboard:
 
 \begin{verbatim}
 kubectl port-forward -n kube-system \
