@@ -101,6 +101,7 @@ kubectl get nodes minikube
 # notice:
 kubectl get no minikube
 kubectl get node minikube
+kubectl get node minikube -o wide
 \end{verbatim}
 
 \bigskip
@@ -214,7 +215,7 @@ Notice:
 \begin{itemize}
     \item you can create namespaces to better organize your components
     \item you define resource restrictions for namespaces
-    \item afect the name: \textit{<service-name>.<namespace-name>.svc.cluster.local}. We will talk about it later.
+    \item afect the name: \textit{$<$service-name$>$.$<$namespace-name$>$.svc.cluster.local}. We will talk about it later.
 \end{itemize}
 
 To change the selected namespace for our commands
@@ -454,7 +455,7 @@ Our factory, I mean the deployment defines how we create our applications as pod
 \bigskip
 1. Get the service file \texttt{introduction/kube-service.yaml}:
 
-\inputminted{yaml}{introduction/kube-deployment.yaml}
+\inputminted{yaml}{introduction/kube-service.yaml}
 
 \bigskip
 2. Deploy:
