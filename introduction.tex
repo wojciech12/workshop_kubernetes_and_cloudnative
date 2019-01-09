@@ -196,15 +196,12 @@ Good to know. You can find there also your token, certificates, etc.
    . . .
    . . .
 
-%
-%
-%
-\section{Exploring Namespace kube-system}
+\pagebreak
+\section{Task at Hand}
 
-Let's look around what we have here.
+We need to move \verb|intro-app| to kubernetes. Users will acess this application: \verb|my.app/echo|. Please help us, our next finanse round depens on it.
 
-\bigskip
-1. What are the namespaces?
+\section{What are the namespaces?}
 
 \begin{verbatim}
 $ kubectl get ns
@@ -218,7 +215,7 @@ Notice:
     \item afect the name: \textit{$<$service-name$>$.$<$namespace-name$>$.svc.cluster.local}. We will talk about it later.
 \end{itemize}
 
-To change the selected namespace for our commands
+To change the selected namespace for our commands:
 
 \begin{verbatim}
 kubectl config set-context \
@@ -226,76 +223,11 @@ kubectl config set-context \
   --namespace <namespace-name>
 \end{verbatim}
 
-\bigskip
-2. Get the list of pods in namespace kube-sytem:
+You can specify namesapce explicitly:
 
 \begin{verbatim}
-$ kubectl get po --namespace=kube-system
-$ kubectl get po -n=kube-system
-\end{verbatim}
-
-Use \verb|kubectl describe po <pod-name> --namespace=kube-system| to find what the version is of:
-\begin{itemize}
-    \item kube-proxy: . . .
-    \item apiserver: . . .
-    \item coredns: . . .
-\end{itemize}
-
-\bigskip
-3. Get the list of services:
-
-\begin{verbatim}
-$ kubectl get svc --namespace=kube-system
-\end{verbatim}
-
-Use \verb|kubernetes describe svc <svc-name> --namespace=kube-system| to find the endpoints for:
-\begin{itemize}
-\item kube-dns: . . .
-\item kubernetes-dashboard: . . .
-\end{itemize}
-
-\bigskip
-4. Logs:
-
-\begin{verbatim}
-$ kubectl logs coredns-c4c -n=kube-system
-$ kubectl logs coredns-c4c -n=kube-system -f
-$ kubectl logs coredns-c4c -n=kube-system --tail=10
-\end{verbatim}
-
-Please display logs of:\\
-\verb|kube-apiserver|, \verb|kube-proxy|, \verb|kube-scheduler|, and \verb|etcd-minikube|.
-
-
-Later, we will also cover events:\\
-\texttt{kubectl get events -n=kube-system}.
-
-\bigskip
-5. Get the console:
-
-\begin{verbatim}
-$ kubectl exec -it kube-apiserver-minikube \
- /bin/sh -n=kube-system
-\end{verbatim}
-
-\bigskip
-6. Kubernetes Dashboard:
-
-\begin{verbatim}
-# on normal deployment:
-# $ kubernetes proxy
-$ minikube dashboard
-\end{verbatim}
-
-\bigskip
-7. Basic metrics:
-
-\begin{verbatim}
-minikube addons enable metrics-server
-
-# wait 5 seconds
-kubectl top nodes
-kubectl top pods
+$ kubectl get pods --namespace=kube-system
+$ kubectl get pods -n default
 \end{verbatim}
 
 %
@@ -304,13 +236,17 @@ kubectl top pods
 \pagebreak
 \section{Kubernetes deployments.yaml}
 
-We have been playing around with kube-system, now let's get our service up and running.
+Let's get instances of our application running.
 
 \bigskip
 1. Get the deployment file \texttt{introduction/kube-deployment.yaml}:
 
 \inputminted{yaml}{introduction/kube-deployment.yaml}
 
+\smallskip
+Notice: the postfix \verb|-deploy| is not the best practise, just to make it more explicit during the training.
+
+\smallskip
 Notice:
 \begin{itemize}
 \item if your repo is private, you need to define \verb|imagePullSecrets|.
@@ -321,11 +257,40 @@ Notice:
 2. Deploy:
 
 \begin{verbatim}
+#impreative:
 $ kubectl create -f introduction/kube-deployment.yaml
+
+#declarative:
+$ kubectl apply -f introduction/kube-deployment.yaml
+\end{verbatim}
+
+To learn mode:\begin{itemize}
+\item \href{https://kubernetes.io/docs/concepts/overview/object-management-kubectl/imperative-config/}{imperative config}
+\item \href{https://kubernetes.io/docs/concepts/overview/object-management-kubectl/declarative-config/}{declarative config}
+\end{itemize}
+
+\bigskip
+3. List deployments:
+
+\begin{verbatim}
+$ kubectl get deploy
+$ kubectl get deployment
+$ kubectl get deployments -o wide
 \end{verbatim}
 
 \bigskip
-3. Check:
+4. Check our deployment:
+
+\begin{verbatim}
+$ kubectl describe deploy <DEPLOYMENT_NAME>
+\end{verbatim}
+
+What the update strategy do we use?
+
+   . . .
+
+\bigskip
+5. We should see pods: 
 
 \begin{verbatim}
 $ kubectl get po
@@ -337,23 +302,7 @@ $ kubectl describe po <POD_NAME>
 \end{verbatim}
 
 \bigskip
-4. To learn about the deployments:
-
-\begin{verbatim}
-$ kubectl get deploy
-$ kubectl get deployment
-\end{verbatim}
-
-\begin{verbatim}
-$ kubectl describe deploy <DEPLOYMENT_NAME>
-\end{verbatim}
-
-What the update strategy do we use?
-
-   . . .
-
-\bigskip
-5. Find the following information:
+6. Find the following information:
 \begin{itemize}
     \item What is the IP of your app pod? . . .
     \item What is ReplicatSet? . . .
@@ -408,7 +357,14 @@ telnet kube-dns.kube-system 53
 \end{verbatim}
 
 \bigskip
-4. Yes, we fix the bug, let's clean up:
+5. Notice, the logs are going to stdout and Kubernetes lets us to see them:
+
+\begin{verbatim}
+kubectl logs intro-app-depl
+\end{verbatim}
+
+\bigskip
+6. Yes, we fix the bug, let's clean up:
 
 \begin{verbatim}
 kubectl delete po intro-app-65db4-...
@@ -469,7 +425,9 @@ $ kubectl apply -f introduction/kube-service.yaml
 3. Check:
 
 \begin{verbatim}
+$ kubectl get services
 $ kubectl get svc
+$ kubectl describe svc ...
 \end{verbatim}
 
 \bigskip
@@ -488,7 +446,7 @@ $ kubectl get svc
 6. Let's access it:
 
 \begin{verbatim}
-export SVC_PORT=$(kubectl get service intro-app \
+export SVC_PORT=$(kubectl get service intro-app-svc \
     --output='jsonpath="{.spec.ports[0].nodePort}"' \
     | tr -d '"')
 curl  $(minikube ip):${SVC_PORT}
@@ -502,9 +460,7 @@ Notice: on Azure, AWS, or Google, we would get the loadbalancer created and publ
 \begin{verbatim}
 $ kubectl exec -it intro-app-65db487447-lrhb9 /bin/bash
 
-/# curl intro-app
-/# curl intro-app.default
-/# curl intro-app.default.svc
+/# curl intro-app-svc
 
 /# apt-get update && apt-get install dnsutils -qq
 /# # resolve the same host names:
@@ -518,9 +474,14 @@ $ kubectl exec -it intro-app-65db487447-lrhb9 /bin/bash
 $ kubectl run -i --tty busybox --image=busybox -- sh
 /# curl intro-app
 /#
-/# wget -O- intro-app
+/# wget -O- intro-app-svc
+/# wget -O- intro-app-svc.default
+/# wget -O- intro-app-svc.default.svc
 /# wget -O- kubernetes-dashboard.kube-system
 \end{verbatim}
+
+\bigskip
+9. Delete the busybox deployment.
 
 %
 %
@@ -544,7 +505,7 @@ $ kubectl get po
 2. Change the value of label \verb|me| to your name in the service definition.
 
 \bigskip
-3. Modify the \verb|depoyment.yml| to get 3 running pods, use: \texttt{kubectl apply -f}
+3. Modify the \verb|depoyment.yml| to get 3 pods, use: \texttt{kubectl apply -f}
 
 \bigskip
 4. Add one more label to service.
@@ -552,22 +513,8 @@ $ kubectl get po
 \bigskip
 5. What does happen if we add one more selector, apply it:
 
-\begin{minted}{yaml}
-apiVersion: v1
-kind: Service
-metadata:
-  name: intro-app
-  labels:
-    me: wojtek
-spec:
-  ports:
-  - port: 80
-    protocol: TCP
-  selector:
-    app: intro-app
-    break: the-connection-with-pods
-  type: LoadBalancer
-\end{minted}
+\inputminted{yaml}{introduction/exercise-broke-svc/kube-service-broke.yml}
+
 
 Can we connect?
 
@@ -621,7 +568,7 @@ $ curl -I  $(minikube ip):${SVC_PORT}
 1. Install the ingress-controller --- \verb|traefik|:
 
 \begin{verbatim}
-$ kubectl apply -f  introduction/ingress
+$ kubectl apply -f  introduction/ingress-controller
 \end{verbatim}
 
 \bigskip
@@ -674,6 +621,7 @@ Please answer the following questions:
 \bigskip
 
 \section{Fail-over}
+Let's see what happens when our application crashes.
 
 \bigskip
 1. Open console.
@@ -723,9 +671,12 @@ kubectl logs <YOUR_INGRESS_CONTROLER_POD>
 kubectl get events
 \end{verbatim}
 
+\bigskip
+Notice: observability is a key, you should have at least monitoring.
 %
 %
 %
+\pagebreak
 \section{Kubernetes configmap}
 
 With configmaps, we can deliver values for environment variables or files. Let's change the page in our application:
@@ -762,16 +713,16 @@ kubectl get cm index-html -o yaml
 kubectl get cm index-html -o json
 \end{verbatim}
 
-\bigskip
+\pagebreak
 5. Let's mount it:
 
 \begin{minted}{yaml}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: intro-app
+  name: intro-app-deploy
   labels:
-    app: intro-app
+    app_deploy: intro-app
 spec:
   replicas: 1
   selector:
@@ -805,12 +756,78 @@ spec:
 curl --header 'Host: my.app'  "http://$(minikube ip):30288/echo"
 \end{verbatim}
 
+\bigskip
+6. We can also set environment values, let's create new configmap:
+
+\begin{verbatim}
+kubectl create configmap intro-app-config \
+  --from-literal=db.name=mydb
+\end{verbatim}
+
+\bigskip
+7. .. and use it:
+
+\begin{minted}{yaml}
+        env:
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: intro-app-config
+              key: db.name
+\end{minted}
+
+\bigskip
+8. Open a console in your pods and check whether the ENV variable is set:
+
+\begin{verbatim}
+\# printenv | grep DB_NAME
+\end{verbatim}
+
+\bigskip
+Recomendation: Keep everything minimal.
 %
 %
 %
 \section{Kubernetes secret}
 
-The same as the Kubernetes config, difference, it is stored only on the master nodes. 
+Secrets are very similar to configmaps. They provide minimal better security than configmaps.
+
+\bigskip
+1. Create a secret with database password:
+
+\begin{verbatim}
+kubectl create secret generic intro-app-secret \
+  --from-literal="db.password=nomoresecrets"
+\end{verbatim}
+
+\bigskip
+2. Bind it to environment variable in the deployment:
+
+\begin{verbatim}
+    env:
+      - name: DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: intro-app-secret
+            key: db.password
+\end{verbatim}
+
+
+\bigskip
+3. Please deliver cert.crt to your application and mount it in \verb|/usr/secet|:
+
+\begin{verbatim}
+echo "CERT" > cert.crt
+kubectl create secret generic intro-app-cert --from-file cert.crt
+\end{verbatim}
+
+
+%
+\section{Kubernetes Persistent Volumes}
+
+A persistence storage that survives your pod being deleted.
+
+Notice: \verb|empty{}|
 
 %
 %
@@ -823,11 +840,85 @@ The same as the Kubernetes config, difference, it is stored only on the master n
 3. Helm
 \end{markdown}
 
-\section{Kubernetes Persistent Volumes}
 
-A persistence storage that survives your pod being deleted.
+%
+%
+%
+\section{Exploring Namespace kube-system}
 
-TBD: mention about empty{}
+Let's look around what we have here.
+
+\bigskip
+1. Get the list of pods in namespace kube-sytem:
+
+\begin{verbatim}
+$ kubectl get po -n=kube-system
+\end{verbatim}
+
+Use \verb|kubectl describe po <pod-name> --namespace=kube-system| to find what the version is of:
+\begin{itemize}
+    \item kube-proxy: . . .
+    \item apiserver: . . .
+    \item coredns: . . .
+\end{itemize}
+
+\bigskip
+2. Get the list of services:
+
+\begin{verbatim}
+$ kubectl get svc --namespace=kube-system
+\end{verbatim}
+
+Use \verb|kubernetes describe svc <svc-name> --namespace=kube-system| to find the endpoints for:
+\begin{itemize}
+\item kube-dns: . . .
+\item kubernetes-dashboard: . . .
+\end{itemize}
+
+\bigskip
+3. Logs:
+
+\begin{verbatim}
+$ kubectl logs coredns-c4c -n=kube-system
+$ kubectl logs coredns-c4c -n=kube-system -f
+$ kubectl logs coredns-c4c -n=kube-system --tail=10
+\end{verbatim}
+
+Please display logs of:\\
+\verb|kube-apiserver|, \verb|kube-proxy|, \verb|kube-scheduler|, and \verb|etcd-minikube|.
+
+
+Later, we will also cover events:\\
+\texttt{kubectl get events -n=kube-system}.
+
+\bigskip
+4. Get the console:
+
+\begin{verbatim}
+$ kubectl exec -it kube-apiserver-minikube \
+ /bin/sh -n=kube-system
+\end{verbatim}
+
+\bigskip
+5. Kubernetes Dashboard:
+
+\begin{verbatim}
+# on normal deployment:
+# $ kubernetes proxy
+$ minikube dashboard
+\end{verbatim}
+
+\bigskip
+6. Basic metrics:
+
+\begin{verbatim}
+minikube addons enable metrics-server
+
+# wait 5 seconds
+kubectl top nodes
+kubectl top pods
+\end{verbatim}
+
 
 \section{Outlook}
 What could be the next steps in learning k8s.
@@ -893,7 +984,7 @@ Next course *Immediate (Developer)*:
 2. Azure Kubernetes Service -  AKS
 3. Amazon Elastic Kubernetes - EKS
 
-Contact: \email{wbarczynski.pro@gmail.com}
+Trainings and Consultancy: \email{wbarczynski.pro@gmail.com}
 \end{markdown}
 
 \end{document}

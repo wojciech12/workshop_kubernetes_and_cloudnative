@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: intro-app
+  name: intro-app-deploy
   labels:
-    app: intro-app
+    app_deploy: intro-app
 spec:
   replicas: 1
   selector:
@@ -17,5 +17,8 @@ spec:
       containers:
       - name: app
         image: wojciech11/api-status:1.0.0
+        env:
+          - name: DB_NAME
+            value: user
         ports:
         - containerPort: 80

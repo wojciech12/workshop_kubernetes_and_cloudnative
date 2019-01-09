@@ -10,4 +10,5 @@ spec:
     protocol: TCP
   selector:
     app: intro-app
+    break: the-connection-with-pods
   type: LoadBalancer
