@@ -8,7 +8,10 @@ The first edition for `Golang Warsaw Meetup <https://www.meetup.com/Golang-Warsa
 Workshops
 =========
 
-- `introduction.pdf <introduction.pdf>`_ - 16H
+Introduction - 4H to 16H:
+
+- `workshop manual <introduction.pdf>`_ - 16H
+- `slides <introduction_deck/index.pdf>`_ (notice: 14MB)
 
 Setup
 =====
