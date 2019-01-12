@@ -199,7 +199,7 @@ Good to know. You can find there also your token, certificates, etc.
 \pagebreak
 \section{Task at Hand}
 
-We need to move \verb|intro-app| to kubernetes. Users will acess this application: \verb|my.app/echo|. Please help us, our next finanse round depens on it.
+We need to deploy \verb|intro-app| on kubernetes. Users will acess this application on \verb|my.app/echo|. Please help us, our next finanse round depens on it!
 
 \section{What are the namespaces?}
 
@@ -211,8 +211,8 @@ $ kubectl get namespaces
 Notice:
 \begin{itemize}
     \item you can create namespaces to better organize your components
-    \item you define resource restrictions for namespaces
-    \item afect the name: \textit{$<$service-name$>$.$<$namespace-name$>$.svc.cluster.local}. We will talk about it later.
+    \item you might define resource restrictions per namespaces
+    \item effect the name: \textit{$<$service-name$>$.$<$namespace-name$>$.svc.cluster.local}. We will talk about it later.
 \end{itemize}
 
 To change the selected namespace for our commands:
@@ -244,7 +244,7 @@ Let's get instances of our application running.
 \inputminted{yaml}{introduction/kube-deployment.yaml}
 
 \smallskip
-Notice: the postfix \verb|-deploy| is not the best practise, just to make it more explicit during the training.
+Notice: the postfix \verb|-deploy| is not the best practise, just to make it more explicit what-is-what during the training.
 
 \smallskip
 Notice:
