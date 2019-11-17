@@ -5,14 +5,18 @@ metadata:
   name: traefik-ingress-controller
   namespace: kube-system
 ---
+apiVersion: apps/v1
 kind: DaemonSet
-apiVersion: extensions/v1beta1
 metadata:
   name: traefik-ingress-controller
   namespace: kube-system
   labels:
     k8s-app: traefik-ingress-lb
 spec:
+  selector:
+    matchLabels:
+      k8s-app: traefik-ingress-lb
+      name: traefik-ingress-lb
   template:
     metadata:
       labels:
@@ -23,7 +27,7 @@ spec:
       terminationGracePeriodSeconds: 60
       hostNetwork: true
       containers:
-      - image: traefik:v1.7.6
+      - image: traefik:v1.7.19
         name: traefik-ingress-lb
         ports:
         - name: http

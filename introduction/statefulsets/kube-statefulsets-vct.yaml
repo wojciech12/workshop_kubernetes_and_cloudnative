@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: StatefulSet 
+metadata:
+  name: intro-db
+  labels:
+    app_deploy: intro-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: intro-db
+  serviceName: "intro-db"
+  template:
+    metadata:
+      labels:
+        app: intro-db
+    spec:
+      containers:
+      - name: db
+        image: wojciech11/api-status:1.0.0
+        env:
+          - name: DB_NAME
+            value: user
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /data
+          name: intro-db-vol
+      restartPolicy: Always
+  volumeClaimTemplates:
+  - metadata:
+      name: intro-db-vol
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi

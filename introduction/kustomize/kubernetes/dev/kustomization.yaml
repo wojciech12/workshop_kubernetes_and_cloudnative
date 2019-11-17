@@ -1,0 +1,7 @@
+commonLabels:
+  env: dev
+bases:
+  - ../base
+patches:
+  - scale.yaml
+  - image.yaml

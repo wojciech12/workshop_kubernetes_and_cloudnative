@@ -19,10 +19,11 @@
 
 \newcommand*{\email}[1]{\href{mailto:#1}{\nolinkurl{#1}} } 
 
-\title{Kubernetes Introduction Workshop\\Golang Warsaw Meetup\\ { \small \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0} }  }
+\title{Kubernetes Workshop \\{\small \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0} }  }
 \author{Wojciech Barczynski (wbarczynski.pro@gmail.com)}
 \date{}
 
+\usepackage{pmboxdraw} % verbatim and unicode https://tex.stackexchange.com/questions/245777/latex-and-unicode-within-verbatim-environment
 
 \begin{document}
 
@@ -460,11 +461,9 @@ Notice: on Azure, AWS, or Google, we would get the loadbalancer created and publ
 \begin{verbatim}
 $ kubectl exec -it intro-app-65db487447-lrhb9 /bin/bash
 
-/# curl intro-app-svc
-
 /# apt-get update && apt-get install dnsutils -qq
 /# # resolve the same host names:
-/# nslookup intro-app
+/# nslookup intro-app-svc
 \end{verbatim}
 
 \bigskip
@@ -524,7 +523,7 @@ curl -I  $(minikube ip):${SVC_PORT}
 
 What has changed?
 \begin{verbatim}
-kubectl describe svc intro-app
+kubectl describe svc intro-app-svc
 \end{verbatim}
 
 \bigskip
@@ -547,7 +546,7 @@ Let's update our app from the version \verb|1.0.0| to \verb|2.0.0|:
 2. You can also change it with set image:
 
 \begin{verbatim}
-$ kubectl set image deployment/<CONTAINER_NAME> \
+$ kubectl set image deployment/<DEPLOYMENT_NAME> \
   <CONTAINER_NAME>=<DOCKER_IMAGE_NAME>:<VERSION>
 \end{verbatim}
 
@@ -821,27 +820,138 @@ echo "CERT" > cert.crt
 kubectl create secret generic intro-app-cert --from-file cert.crt
 \end{verbatim}
 
-
 %
 \section{Kubernetes Persistent Volumes}
 
 A persistence storage that survives your pod being deleted.
 
-Notice: \verb|empty{}|
+\bigskip
+1. Storage class
 
-%
-%
+\begin{verbatim}
+kubectl get storageclasses
+
+NAME                 PROVISIONER                AGE
+standard (default)   k8s.io/minikube-hostpath   223d
+\end{verbatim}
+
+\begin{verbatim}
+kubectl describe storageclasses standard
+
+NAME                 PROVISIONER                AGE
+standard (default)   k8s.io/minikube-hostpath   223d
+\end{verbatim}
+
+\bigskip
+2. Persistence claim and Persistence volume
+
+\inputminted[frame=single]{yaml}{introduction/persistentvolumes/pv.yaml}
+
+\inputminted[frame=single]{yaml}{introduction/persistentvolumes/pvc.yaml}
+
+\bigskip
+3. Let's use it:
+
+\inputminted[frame=single]{yaml}{introduction/persistentvolumes/kube-deployment.yaml}
+
+\bigskip
+4. Find where the mount point is on the host and create there file. Notice: \emph{minikube ssh}
+
+\bigskip
+5. Find the file on the pod with mounted volume.
+
+%%
+\section{Daemonset}
+Why are good use cases for Daemonset? See our treafik ingress controller kubernetes yaml files.
+
+%%
+\section{Statefulsets}
+What if we want to have a database on Kubernetes? Maybe we would like to have deterministic names. Statefulsets comes to rescue:
+
+\bigskip
+1. Simple DB:
+
+\inputminted[frame=single]{yaml}{introduction/statefulsets/kube-statefulsets.yaml}
+
+\bigskip
+Note down what happens after:
+
+\begin{verbatim}
+kubectl scale --replicas=2 statefulset  intro-db
+\end{verbatim}
+
+
+\bigskip
+2. What is a statefulset without a PV. Let's delete the previous statefulset and get a new one;
+
+\inputminted[frame=single]{yaml}{introduction/statefulsets/kube-statefulsets-vct.yaml}
+
+\bigskip
+Scale it up and check in particular \emph{PV} and \emph{PVC}.
+
 %
 \section{Opinionated Configuration}
+The configuration and the generation of the kubernetes files is a hot topic.
 
 \begin{markdown}
-1. envsubst
-2. Ksonnect
+1. envsubst or similar approaches
+2. kustomize
 3. Helm
 \end{markdown}
 
+\bigskip
+1. envsubst or similar approach.
 
-%
+\begin{minted}{yaml}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: my-extractor
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/request-modifier: "ReplacePathRegex: /my-app/(.*) /$1"
+spec:
+  rules:
+  - host: ${HOST}
+    http:
+      paths:
+        - path: /extract
+          backend:
+            serviceName: extractor
+            servicePort: 80
+\end{minted}
+
+\begin{verbatim}
+export HOST=
+envsubst < my-k8s.tmpl.yaml > my-k8s.yaml
+\end{verbatim}
+
+\bigskip
+2. kustomize - overlay
+\begin{verbatim}
+.
+├── base
+│   ├── kube-deployment.yaml
+│   ├── kube-service.yaml
+│   └── kustomization.yaml
+├── dev
+│   ├── image.yaml
+│   ├── kustomization.yaml
+│   └── scale.yaml
+├── production
+│   ├── image.yaml
+│   ├── kustomization.yaml
+│   └── scale.yaml
+└── staging
+    ├── image.yaml
+    ├── kustomization.yaml
+    └── scale.YAML
+\end{verbatim}
+
+
+\bigskip
+3. Helm is aiming to become a package manager for Kubernetes.
+
 %
 %
 \section{Exploring Namespace kube-system}
@@ -919,7 +1029,29 @@ kubectl top nodes
 kubectl top pods
 \end{verbatim}
 
+%
+\section{Liveness/Readiness probes}
+See \href{https://github.com/wojciech12/talk_zero_downtime_deployment_with_kubernetes}{https://github.com/wojciech12/talk\_zero\_downtime\_deployment\_with\_kubernetes}. Notes:
+\bigskip
+\bigskip
+\bigskip
 
+%
+\section{Resource, Limits and QoS}
+Notes:
+
+\bigskip
+\bigskip
+\bigskip
+
+%
+\section{RBAC}
+See \emph{introduction/ingress-controller/traefik-ingress-controller\_rbac.yaml} and the \emph{Service Account} definition for traefik. Notes:
+\bigskip
+\bigskip
+\bigskip
+
+%
 \section{Outlook}
 What could be the next steps in learning k8s.
 
@@ -934,6 +1066,8 @@ Next course *Immediate (Developer)*:
 3. Resource and Limits, QoS for your pods, schedule policies
 4. Statefulsets
 5. DaemonSets
+6. Taints and Tolerations
+7. Node affinity 
 
 *Observability plus* with Istio demo as what might the future be:
 
@@ -947,7 +1081,6 @@ Next course *Immediate (Developer)*:
 2. Horizontal scaling (beta: vertical pod scaling for the pets)
 3. Continuous Deployment and Integration
 4. TravisCI and Gitlab
-5. (sic :/ ) gitops, have to say few things...
 
 *Network and Security*:
 
@@ -959,9 +1092,8 @@ Next course *Immediate (Developer)*:
 *Kubernetes customization*
 
 1. Write your first CRD
-2. ...
-3. ...
-4. FaaS? Kubeless?
+2. Operators
+3. Plugins to kubectl
 
 *CloudNative Ecosystem*
 
@@ -970,13 +1102,15 @@ Next course *Immediate (Developer)*:
 3. Observability: Tracing
 4. Ingress Controllers: Traefik, ... , talk about standard and controller-specific annotations
 5. Cert-manager
-6. (Traditional) backups with Ark
-7. Operators for etcd and Vault
+6. Operators for etcd and Vault
+7. Kubeless
 
 *More*
 
 1. Istio
 2. Operators for ...
+
+*Security*
 
 *Optionals*
 

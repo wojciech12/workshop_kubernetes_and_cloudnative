@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: intro-app-pv-deploy
+  labels:
+    app_deploy: intro-app-pv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: intro-app-pv
+  template:
+    metadata:
+      labels:
+        app: intro-app-pv
+    spec:
+      containers:
+      - name: app
+        image: wojciech11/api-status:1.0.0
+        env:
+          - name: DB_NAME
+            value: user
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /data
+          name: app-data
+      volumes:
+      - name: app-data
+        persistentVolumeClaim:
+          claimName: app-intro-pvc
