@@ -26,7 +26,7 @@ Development topics, e.g., building your own operator or kubectl plugin, see `wor
 Prerequisites
 =============
 
-- laptop with 16GB memory (preferable: linux or macOS)
+- laptop at least 8GB, the best: 16GB memory (preferable: linux or macOS)
 - installed:
   
   - git
