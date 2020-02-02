@@ -18,6 +18,7 @@ Workshops
 
    - security
    - observability
+   - `zero-downtime deployments <https://github.com/wojciech12/workshop_kubernetes_and_cloudnative/blob/master/README.rst>`_
    - see the Outlook section in `workshop manual <introduction.pdf>`_
 
 Development topics, e.g., building your own operator or kubectl plugin, see `workshop_golang <https://github.com/wojciech12/workshop_golang>`_.
