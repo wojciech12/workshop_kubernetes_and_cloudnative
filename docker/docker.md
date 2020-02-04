@@ -15,19 +15,19 @@
 
 5. Reduce the number of layers.
 
-  What is the difference?
+   What is the difference?
 
-  <pre><code>RUN apt-get -y update && \
+   <pre><code>RUN apt-get -y update && \
        apt-get install -y python
-  </code></pre>
+   </code></pre>
 
-  vs
+   vs
 
-  <pre><code>RUN apt-get -y update
+   <pre><code>RUN apt-get -y update
       RUN apt-get install -y python
-  </code></pre>
+   </code></pre>
 
-  Notice: every <i>RUN</i>, <i>COPY</i>, <i>ADD</i> create a layer.
+   Notice: every <i>RUN</i>, <i>COPY</i>, <i>ADD</i> create a layer.
 
 6. Reduce the size:
 
@@ -48,12 +48,12 @@
 
 10. Do you need to access a private git repositories inside Docker?
 
-<pre><code>docker build -t mojdocker . \
-   -f Dockerfile \
-   --build-arg GITHUB_TOKEN=TOKEN
-</code></pre>
+    <pre><code>docker build -t mojdocker . \
+    -f Dockerfile \
+    --build-arg GITHUB_TOKEN=TOKEN
+    </code></pre>
 
-and multistage.
+    and multistage.
 
 12. Multi-stage builds, see [example](multi-stage/).
 
