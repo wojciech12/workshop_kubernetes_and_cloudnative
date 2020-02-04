@@ -33,12 +33,12 @@
 
    - Be specific what you copy - <i>COPY</i>
    - Do not install, what you do not need, e.g., use <code>-no-install-recommends</code> for apt
-   - Remove the cache:
+   - Remove the cache in the same run as install:
 
-    <pre><code>RUN apt-get -y update \
-      && apt-get install -y \
+     <pre><code>RUN apt-get -y update \
+      && apt-get install -y vim \
       rm -rf /var/lib/apt/lists/*
-    </code></pre>
+     </code></pre>
 
 7. Order! The things that changes the most should be the last to be added.
 
