@@ -68,6 +68,8 @@
     - rebuild your base images / pull new ones
     - do not put secrets in your image, see the multi-stage and the mountable secrets.
 
+17. Notice, you can use `--cache-from` to use an image as a cache resource.
+
 ## References
 
 - https://github.com/goodwithtech/dockle
