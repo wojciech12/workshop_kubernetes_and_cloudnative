@@ -1,0 +1,294 @@
+\documentclass[12pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{enumerate}
+\usepackage{listings}
+\usepackage{fancyvrb}
+
+\usepackage{tikz}
+\usepackage{graphicx}
+\usetikzlibrary{positioning}
+
+\usepackage[document]{ragged2e} % keep all left
+\usepackage{minted} % yaml syntax highlighting
+
+\newenvironment{markdown}%
+    {\VerbatimEnvironment\begin{VerbatimOut}{tmp.markdown}}%
+    {\end{VerbatimOut}%
+        \immediate\write18{pandoc tmp.markdown -t latex -o tmp.tex}%
+        \input{tmp.tex}}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\newcommand*{\email}[1]{\href{mailto:#1}{\nolinkurl{#1}} } 
+
+\title{Kubernetes Workshop part 2\\{\small \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0} }  }
+\author{Wojciech Barczynski (wbarczynski.pro@gmail.com)}
+\date{}
+
+\usepackage{pmboxdraw} % verbatim and unicode https://tex.stackexchange.com/questions/245777/latex-and-unicode-within-verbatim-environment
+
+\begin{document}
+
+\begin{titlepage}
+\maketitle
+\end{titlepage}
+
+\tableofcontents
+\pagebreak
+\section{Prerequiments}
+
+You need to feel good with Command Line Interface. You should understand what Docker is.
+
+\begin{itemize}%
+\item Workstation with Linux or OSX recommended.%
+\item Software \begin{itemize}%
+    \item k3s
+    \item Kubernetes {\small CLI}
+    \item Docker
+    \end{itemize}%
+\item Tools \begin{itemize}%
+    \item jq (\href{https://stedolan.github.io/jq/}{stedolan.github.io/jq/})%
+    \end{itemize}
+\item Good to have \begin{itemize}%
+    \item hub.docker.com account or alternative docker repository
+    \end{itemize}
+\end{itemize}
+
+\subsection{How to install}
+
+\begin{markdown}
+- K3S - [github.com/k3s-io/k3s](https://github.com/k3s-io/k3s)
+- Kubernes CLI - [kubernetes.io/docs/tasks/tools/](https://kubernetes.io/docs/tasks/tools/)
+\end{markdown}
+
+\subsection{Verify the setup}
+
+% --port "8443:8443@loadbalancer" 
+% https://k3d.io/usage/guides/exposing_services/
+\begin{verbatim}
+$ k3d cluster create --port "8080:8080@loadbalancer" \
+                     --port "8000:80@loadbalancer" \
+                     'k8s-w10i-workshop'
+\end{verbatim}
+
+\begin{verbatim}
+$ kubectl config use-context k3d-k8s-w10i-workshop
+
+$ kubectl cluster-info
+
+Kubernetes control plane is running at https://0.0.0.0:60602
+CoreDNS is running at https://...
+Metrics-server is running at https://...
+\end{verbatim}
+
+\section{Kubernetes Persistent Volumes}
+
+A persistence storage that survives your pod being deleted.
+
+\bigskip
+1. Storage class
+
+\begin{verbatim}
+kubectl get storageclasses
+
+NAME                 PROVISIONER                AGE
+standard (default)   k8s.io/minikube-hostpath   223d
+\end{verbatim}
+
+\begin{verbatim}
+kubectl describe storageclasses standard
+
+NAME                 PROVISIONER                AGE
+standard (default)   k8s.io/minikube-hostpath   223d
+\end{verbatim}
+
+\bigskip
+2. Persistence claim and Persistence volume
+
+\inputminted[frame=single]{yaml}{manifests/persistentvolumes/pv.yaml}
+
+\inputminted[frame=single]{yaml}{manifests/persistentvolumes/pvc.yaml}
+
+\bigskip
+3. Let's use it:
+
+\inputminted[frame=single]{yaml}{manifests/persistentvolumes/kube-deployment.yaml}
+
+\bigskip
+4. Find where the mount point is on the host and create there file. Notice: \emph{minikube ssh}
+
+\bigskip
+5. Find the file on the pod with mounted volume.
+
+%%
+\section{Daemonset}
+Why are good use cases for Daemonset? See our treafik ingress controller kubernetes yaml files.
+
+%%
+\section{Statefulsets}
+What if we want to have a database on Kubernetes? Maybe we would like to have deterministic names. Statefulsets comes to rescue:
+
+\bigskip
+1. Simple DB:
+
+\inputminted[frame=single]{yaml}{manifests/statefulsets/kube-statefulsets.yaml}
+
+\bigskip
+Note down what happens after:
+
+\begin{verbatim}
+$ kubectl scale --replicas=2 statefulset  intro-db
+\end{verbatim}
+
+
+\bigskip
+2. What is a statefulset without a {\small PV}. Let's delete the previous statefulset and get a new one;
+
+\inputminted[frame=single]{yaml}{manifests/statefulsets/kube-statefulsets-vct.yaml}
+
+\bigskip
+Scale it up and check in particular \emph{PV} and \emph{PVC}.
+
+%
+\section{Opinionated Configuration}
+The configuration and the generation of the kubernetes files is a hot topic.
+
+\begin{markdown}
+1. envsubst or similar approaches
+2. kustomize
+3. Helm
+\end{markdown}
+
+\bigskip
+1. envsubst or similar approach.
+
+\begin{minted}{yaml}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: my-extractor
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/request-modifier: "ReplacePathRegex: /my-app/(.*) /$1"
+spec:
+  rules:
+  - host: ${HOST}
+    http:
+      paths:
+        - path: /extract
+          backend:
+            serviceName: extractor
+            servicePort: 80
+\end{minted}
+
+\begin{verbatim}
+export HOST=
+envsubst < my-k8s.tmpl.yaml > my-k8s.yaml
+\end{verbatim}
+
+\bigskip
+2. kustomize - overlay
+\begin{verbatim}
+.
+├── base
+│   ├── kube-deployment.yaml
+│   ├── kube-service.yaml
+│   └── kustomization.yaml
+├── dev
+│   ├── image.yaml
+│   ├── kustomization.yaml
+│   └── scale.yaml
+├── production
+│   ├── image.yaml
+│   ├── kustomization.yaml
+│   └── scale.yaml
+└── staging
+    ├── image.yaml
+    ├── kustomization.yaml
+    └── scale.YAML
+\end{verbatim}
+
+
+\bigskip
+3. Helm is aiming to become a package manager for Kubernetes.
+
+%
+%
+\section{Exploring Namespace kube-system}
+
+Let's look around what we have here.
+
+\bigskip
+1. Get the list of pods in namespace kube-sytem:
+
+\begin{verbatim}
+$ kubectl get po -n=kube-system
+\end{verbatim}
+
+Use \verb|kubectl describe po <pod-name> --namespace=kube-system| to find what the version is of:
+\begin{itemize}
+    \item kube-proxy: . . .
+    \item apiserver: . . .
+    \item coredns: . . .
+\end{itemize}
+
+\bigskip
+2. Get the list of services:
+
+\begin{verbatim}
+$ kubectl get svc --namespace=kube-system
+\end{verbatim}
+
+Use \verb|kubernetes describe svc <svc-name> --namespace=kube-system| to find the endpoints for:
+\begin{itemize}
+\item kube-dns: . . .
+\item kubernetes-dashboard: . . .
+\end{itemize}
+
+\bigskip
+3. Logs:
+
+\begin{verbatim}
+$ kubectl logs coredns-c4c -n=kube-system
+$ kubectl logs coredns-c4c -n=kube-system -f
+$ kubectl logs coredns-c4c -n=kube-system --tail=10
+\end{verbatim}
+
+Please display logs of:\\
+\verb|kube-apiserver|, \verb|kube-proxy|, \verb|kube-scheduler|, and \verb|etcd-minikube|.
+
+
+Later, we will also cover events:\\
+\texttt{kubectl get events -n=kube-system}.
+
+\bigskip
+4. Get the console:
+
+\begin{verbatim}
+$ kubectl exec -it kube-apiserver-minikube \
+ /bin/sh -n=kube-system
+\end{verbatim}
+
+\bigskip
+5. Kubernetes Dashboard:
+
+\begin{verbatim}
+# on normal deployment:
+# $ kubernetes proxy
+$ minikube dashboard
+\end{verbatim}
+
+\bigskip
+6. Basic metrics:
+
+\begin{verbatim}
+minikube addons enable metrics-server
+
+# wait 5 seconds
+kubectl top nodes
+kubectl top pods
+\end{verbatim}
+
+\end{document}
