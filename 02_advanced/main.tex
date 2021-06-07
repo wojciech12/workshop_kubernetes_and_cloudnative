@@ -47,6 +47,7 @@ You need to feel good with Command Line Interface. You should understand what Do
     \item k3s
     \item Kubernetes {\small CLI}
     \item Docker
+    \item minikube
     \end{itemize}%
 \item Tools \begin{itemize}%
     \item jq (\href{https://stedolan.github.io/jq/}{stedolan.github.io/jq/})%
@@ -61,6 +62,7 @@ You need to feel good with Command Line Interface. You should understand what Do
 \begin{markdown}
 - K3S - [github.com/k3s-io/k3s](https://github.com/k3s-io/k3s)
 - Kubernes CLI - [kubernetes.io/docs/tasks/tools/](https://kubernetes.io/docs/tasks/tools/)
+- minikube - [minikube.sigs.k8s.io/docs/start/](https://minikube.sigs.k8s.io/docs/start/)
 \end{markdown}
 
 \subsection{Verify the setup}
@@ -83,6 +85,35 @@ CoreDNS is running at https://...
 Metrics-server is running at https://...
 \end{verbatim}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Statefulsets}
+What if we want to have a database on Kubernetes? Maybe we would like to have deterministic names. Statefulsets comes to rescue:
+
+\bigskip
+1. Simple DB:
+
+\inputminted[frame=single]{yaml}{manifests/statefulsets/kube-statefulsets.yaml}
+
+\bigskip
+Note down what happens after:
+
+\begin{verbatim}
+$ kubectl scale --replicas=2 statefulset  intro-db
+\end{verbatim}
+
+\bigskip
+2. What is a statefulset without a Persistent Volume ({\small PV}). Let's delete the previous statefulset and get a new one;
+
+\inputminted[frame=single]{yaml}{manifests/statefulsets/kube-statefulsets-vct.yaml}
+
+\bigskip
+Scale it up and check in particular \emph{PV} and \emph{PVC}.
+\begin{verbatim}
+$ kubectl get pv
+$ kubectl get pvc
+\end{verbatim}
+
 \section{Kubernetes Persistent Volumes}
 
 A persistence storage that survives your pod being deleted.
@@ -91,17 +122,17 @@ A persistence storage that survives your pod being deleted.
 1. Storage class
 
 \begin{verbatim}
-kubectl get storageclasses
+$ kubectl get storageclasses
 
 NAME                 PROVISIONER                AGE
-standard (default)   k8s.io/minikube-hostpath   223d
+local-path (default)   rancher.io/local-path   3d
 \end{verbatim}
 
 \begin{verbatim}
-kubectl describe storageclasses standard
+kubectl describe storageclasses local-path
 
 NAME                 PROVISIONER                AGE
-standard (default)   k8s.io/minikube-hostpath   223d
+local-path (default)   rancher.io/local-path   3d
 \end{verbatim}
 
 \bigskip
@@ -122,106 +153,35 @@ standard (default)   k8s.io/minikube-hostpath   223d
 \bigskip
 5. Find the file on the pod with mounted volume.
 
-%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Daemonset}
-Why are good use cases for Daemonset? See our treafik ingress controller kubernetes yaml files.
-
-%%
-\section{Statefulsets}
-What if we want to have a database on Kubernetes? Maybe we would like to have deterministic names. Statefulsets comes to rescue:
-
-\bigskip
-1. Simple DB:
-
-\inputminted[frame=single]{yaml}{manifests/statefulsets/kube-statefulsets.yaml}
-
-\bigskip
-Note down what happens after:
-
-\begin{verbatim}
-$ kubectl scale --replicas=2 statefulset  intro-db
-\end{verbatim}
-
-
-\bigskip
-2. What is a statefulset without a {\small PV}. Let's delete the previous statefulset and get a new one;
-
-\inputminted[frame=single]{yaml}{manifests/statefulsets/kube-statefulsets-vct.yaml}
-
-\bigskip
-Scale it up and check in particular \emph{PV} and \emph{PVC}.
-
-%
-\section{Opinionated Configuration}
-The configuration and the generation of the kubernetes files is a hot topic.
+Why are good use cases for Daemonset?
 
 \begin{markdown}
-1. envsubst or similar approaches
-2. kustomize
-3. Helm
+- ingress controller
+- fluentbit
 \end{markdown}
 
-\bigskip
-1. envsubst or similar approach.
-
-\begin{minted}{yaml}
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: my-extractor
-  annotations:
-    kubernetes.io/ingress.class: traefik
-    traefik.ingress.kubernetes.io/request-modifier: "ReplacePathRegex: /my-app/(.*) /$1"
-spec:
-  rules:
-  - host: ${HOST}
-    http:
-      paths:
-        - path: /extract
-          backend:
-            serviceName: extractor
-            servicePort: 80
-\end{minted}
-
-\begin{verbatim}
-export HOST=
-envsubst < my-k8s.tmpl.yaml > my-k8s.yaml
-\end{verbatim}
-
-\bigskip
-2. kustomize - overlay
-\begin{verbatim}
-.
-├── base
-│   ├── kube-deployment.yaml
-│   ├── kube-service.yaml
-│   └── kustomization.yaml
-├── dev
-│   ├── image.yaml
-│   ├── kustomization.yaml
-│   └── scale.yaml
-├── production
-│   ├── image.yaml
-│   ├── kustomization.yaml
-│   └── scale.yaml
-└── staging
-    ├── image.yaml
-    ├── kustomization.yaml
-    └── scale.YAML
-\end{verbatim}
-
-
-\bigskip
-3. Helm is aiming to become a package manager for Kubernetes.
-
-%
-%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Exploring Namespace kube-system}
 
-Let's look around what we have here.
+Let's look around what we have here. To be able to see how the Kubernetes looks like, we need to use minikube.
 
 \bigskip
-1. Get the list of pods in namespace kube-sytem:
+1. Start your minikube:
+
+\begin{verbatim}
+$ minikube start
+$ minikube status
+
+$ kubectl config use-context minikube
+$ kubectl get nodes
+\end{verbatim}
+
+\bigskip
+2. Get the list of pods in namespace kube-sytem:
 
 \begin{verbatim}
 $ kubectl get po -n=kube-system
@@ -235,7 +195,7 @@ Use \verb|kubectl describe po <pod-name> --namespace=kube-system| to find what t
 \end{itemize}
 
 \bigskip
-2. Get the list of services:
+3. Get the list of services:
 
 \begin{verbatim}
 $ kubectl get svc --namespace=kube-system
@@ -244,11 +204,10 @@ $ kubectl get svc --namespace=kube-system
 Use \verb|kubernetes describe svc <svc-name> --namespace=kube-system| to find the endpoints for:
 \begin{itemize}
 \item kube-dns: . . .
-\item kubernetes-dashboard: . . .
 \end{itemize}
 
 \bigskip
-3. Logs:
+4. Logs:
 
 \begin{verbatim}
 $ kubectl logs coredns-c4c -n=kube-system
@@ -259,17 +218,8 @@ $ kubectl logs coredns-c4c -n=kube-system --tail=10
 Please display logs of:\\
 \verb|kube-apiserver|, \verb|kube-proxy|, \verb|kube-scheduler|, and \verb|etcd-minikube|.
 
-
 Later, we will also cover events:\\
 \texttt{kubectl get events -n=kube-system}.
-
-\bigskip
-4. Get the console:
-
-\begin{verbatim}
-$ kubectl exec -it kube-apiserver-minikube \
- /bin/sh -n=kube-system
-\end{verbatim}
 
 \bigskip
 5. Kubernetes Dashboard:
@@ -284,11 +234,14 @@ $ minikube dashboard
 6. Basic metrics:
 
 \begin{verbatim}
-minikube addons enable metrics-server
+$ minikube addons enable metrics-server
 
 # wait 5 seconds
-kubectl top nodes
-kubectl top pods
+$ kubectl top nodes
+$ kubectl top pods -n kube-system
 \end{verbatim}
+
+\bigskip
+7. 
 
 \end{document}

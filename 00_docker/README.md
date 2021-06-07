@@ -1,6 +1,15 @@
 ## Best Practices
 
-1. Minimal images
+
+1. Use a Docker linter, for example [hadolint](https://github.com/hadolint/hadolint) or [dockle](https://github.com/goodwithtech/dockle):
+
+    ```
+    $ find . -iname Dockerfile | xargs -I {} bash -c "echo {}; docker run --rm -i hadolint/hadolint < {}"
+    ```
+
+    You do not need neccessary to run it on CI/CD on every commit. It could be a async job checking your repo.
+
+2. Minimal images
 
    - [ubuntu](https://hub.docker.com/_/ubuntu/)
    - [alpine](https://hub.docker.com/_/alpine)
@@ -9,11 +18,13 @@
 
    See: [baseimage](https://phusion.github.io/baseimage-docker/)
 
-2. Do not use random docker images.
+3. Do not forget about <code>.dockerignore</code>, see [example for the prometheus project](https://github.com/prometheus/golang-builder/blob/master/.dockerignore).
 
-4. Use a specific tag for your base docker image.
+4. Use a specific tag for your base docker image. Do not use *latest*.
 
-5. Reduce the number of layers.
+5. Let CI/CD to generate the tag for the version.
+
+6. Reduce the number of layers.
 
    What is the difference?
 
@@ -29,7 +40,7 @@
 
    Notice: every <i>RUN</i>, <i>COPY</i>, <i>ADD</i> create a layer.
 
-6. Reduce the size:
+7. Reduce the size:
 
    - Be specific what you copy - <i>COPY</i>
    - Do not install, what you do not need, e.g., use <code>-no-install-recommends</code> for apt
@@ -40,38 +51,35 @@
       rm -rf /var/lib/apt/lists/*
      </code></pre>
 
-7. Order! The things that changes the most should be the last to be added.
+8. Order! Things that changes the most often should be the last to be added.
 
-8. Use <code>.dockerignore</code>, see [example for the prometheus project](https://github.com/prometheus/golang-builder/blob/master/.dockerignore).
-
-9. Development time: optimize the Docker to your work, do not be afraid to add as many layers as you need to speed up your development process.
+9. Development time: 
+   
+   - optimize the Docker to your work, do not be afraid to add as many layers as you need to speed up your development process. 
+   -  Mount your source code or binary inside the docker when you work on your machine. Now, you can just restart Docker on your machine to have new version of your code running.
 
 10. Do you need to access a private git repositories inside Docker?
 
-    <pre><code>docker build -t mojdocker . \
+    <pre><code>docker build -t my_docker . \
     -f Dockerfile \
     --build-arg GITHUB_TOKEN=TOKEN
     </code></pre>
 
     and multistage.
 
-12. Multi-stage builds, see [example](multi-stage/).
+11. Use Multi-stage builds if possible, see [example](multi-stage/).
+
+12. Try not to run your application as a <i>root</i> user.
 
 13. Mountable secrets for building Docker Images (beta), see [example](secret-mount).
 
-14. Do not use *latest*.
-
-15. Try not to run your application as a <i>root</i> user.
-
-16. Advance:
+14. Others:
 
     - rebuild your base images / pull new ones
-    - do not put secrets in your image, see the multi-stage and the mountable secrets.
-
-17. Notice, you can use `--cache-from` to use an image as a cache resource.
-
+    - security scanner
+    - caching, reusing previous docker images in CI/CD (`--cache-from`)
+    
 ## References
 
-- https://github.com/goodwithtech/dockle
-- https://github.com/hadolint/hadolint
 - https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
+- https://docs.docker.com/develop/develop-images/build_enhancements/

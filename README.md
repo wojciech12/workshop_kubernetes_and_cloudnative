@@ -16,6 +16,7 @@
 2. Introduction part 2 - k8s namespace and more resources to learn:
 
    - [workshop manual](02_advanced/main.pdf)
+   - slides as above
 
    Covered: kubernetes namespace, daemonsets, statefulsets, volumens, PVC, and job/cronjob.
 
