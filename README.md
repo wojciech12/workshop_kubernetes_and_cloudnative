@@ -20,13 +20,16 @@
 
    Covered: kubernetes namespace, daemonsets, statefulsets, volumens, PVC, and job/cronjob.
 
-3. Devs:
+3. Basics CI/CD - how to work with manifests and how to generate them.
 
-   Covered: liveness and readiness probes + more examples, and how to shutdown your application correctly, QoS.
-
-4. Basics CI/CD - how to work with manifests and how to generate them.
+   - [workshop manual](03_Continuous_Deployment_basics/README.md)
+   - [examples]()
 
    Covered: envsubst, helm, and kustomize.
+
+4. Devs:
+
+   Covered: liveness and readiness probes + more examples, and how to shutdown your application correctly, QoS.
 
 5. CI/CD for Kubernetes in your company
 
