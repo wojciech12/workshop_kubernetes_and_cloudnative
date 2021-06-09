@@ -13,4 +13,7 @@
 
   - common API: openAPI, GPRS
   - architecture patterns: queue
-  
+
+## Reference:
+
+- [Engineering You by Martin Thompson](https://www.youtube.com/watch?v=S4LzzuMTqjs)
