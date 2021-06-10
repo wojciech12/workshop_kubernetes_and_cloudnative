@@ -10,3 +10,7 @@
 
 00_docker/secret-mount/secret.txt
 01_introduction/traefik-architecture.png
+
+## python
+**/.venv
+**/__pycache__/
