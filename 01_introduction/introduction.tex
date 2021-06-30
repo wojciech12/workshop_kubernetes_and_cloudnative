@@ -21,7 +21,7 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
-\newcommand*{\email}[1]{\href{mailto:#1}{\nolinkurl{#1}} } 
+\newcommand*{\email}[1]{\href{mailto:#1}{\nolinkurl{#1}} }
 
 \title{Kubernetes Workshop \\{\small \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0} }  }
 \author{Wojciech Barczynski (wbarczynski.pro@gmail.com)}
@@ -65,7 +65,7 @@ You need to feel good with Command Line Interface. You should understand what Do
 
 \subsection{Verify the setup}
 
-% --port "8443:8443@loadbalancer" 
+% --port "8443:8443@loadbalancer"
 % https://k3d.io/usage/guides/exposing_services/
 \begin{verbatim}
 $ k3d cluster create --port "8080:8080@loadbalancer" \
@@ -124,14 +124,14 @@ $ kubectl get node k3d-k8s-w10i-workshop-server-0
 $ kubectl get nodes k3d-k8s-w10i-workshop-server-0
 \end{verbatim}
 
-You can find the abbreviations with the command: 
+You can find the abbreviations with the command:
 
 \begin{verbatim}
 $ kubectl api-resources
 \end{verbatim}
 
 \bigskip
-3. Get more details: 
+3. Get more details:
 
 \begin{verbatim}
 $ kubectl describe nodes k3d-k8s-w10i-workshop-server-0
@@ -284,7 +284,7 @@ Notice: you can check \verb|kubectl api-resources| to see which resources are na
 %
 %
 \pagebreak
-\section{Kubernetes deployments.yaml}
+\section{Kubernetes deployment yaml}
 
 Let's get instances of our application running. We use an application docker image built on the top of official nginx (\href{https://hub.docker.com/\_/nginx}{hub.docker.com/\_/nginx}), you will find Dockerfiles in \texttt{manifests/dockers}.
 
@@ -298,7 +298,7 @@ Let's get instances of our application running. We use an application docker ima
 
 \node[draw,minimum width=4cm,minimum height=1cm, text width=3cm, align=center, label=right:{$labels: app=intro-app$}] (P1) [above right=of D] {\textbf{intro-app-912} \\ pod};
 
-\node[draw,minimum width=4cm,minimum height=1cm, text width=3cm, align=center, label=right:{$labels: app=my-app$}] (P2) [below right=of D] {\textbf{intro-app-232} \\ pod};
+\node[draw,minimum width=4cm,minimum height=1cm, text width=3cm, align=center, label=right:{$labels: app=intro-app$}] (P2) [below right=of D] {\textbf{intro-app-232} \\ pod};
 
 \draw [->,thick,shorten >=1mm,shorten <=1mm] (D.east) -- (P1.west);
 \draw [->,thick,shorten >=1mm,shorten <=1mm] (D.east) -- (P2.west);
@@ -353,7 +353,7 @@ If you want to know more about the difference, checks docs:\begin{itemize}
 Trade-offs between them - \href{https://kubernetes.io/docs/concepts/overview/working-with-objects/object-management/}{kubernetes.io/docs/concepts/overview/working-with-objects/object-management/}.
 
 \bigskip
-Notice, \verb|kubectl| has a diff command: 
+Notice, \verb|kubectl| has a diff command:
 \begin{verbatim}
 $ kubectl diff -R -f manifests/ingress
 \end{verbatim}
@@ -412,7 +412,7 @@ Notice: we will discus other fields -- QoS, Conditions (Ready), Node-Selector, a
 7. Increase the number of pods, modify the {\small YAML} manifest and apply the changes. Check wherher you see more pods \verb|kubectl get po|. If the answer is yes, please scale down your deployment to one pod instance.%
 
 \bigskip
-8. What does it happen when you delete one of the pods? 
+8. What does it happen when you delete one of the pods?
 \begin{verbatim}
 $ kubectl delete po intro-app-65db4-...
 $ kubectl get po
@@ -456,7 +456,7 @@ You will use \verb|port-forward| very often as one of the first steps of many de
 The \verb|port-forward| can take also as a parameter also Kubernetes service or deployment\footnote{\href{https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/}{kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster}}.
 
 \bigskip
-Let's learn about services and ingresses first, later 
+Let's learn about services and ingresses first, later
 we see how we can modify our deployment and update the application.
 
 \section{Get your application logs}
@@ -588,7 +588,7 @@ $ kubectl describe svc intro-app-svc
 Please note down:
 
 \begin{markdown}
-- Endpoints (where this IP comes from?) . . . 
+- Endpoints (where this IP comes from?) . . .
 - Selector . . .
 - IP . . .
 \end{markdown}
@@ -612,10 +612,12 @@ $ kubectl run busybox --image=busybox:1.28.4 --rm \
 $ kubectl run -i --tty busybox-wget --rm \
     --image=busybox:1.28.4 -- sh
 
-/# wget -O- intro-app-svc
+# what the port is?
+/# wget -O- intro-app-svc:YOUR_SRV_PORT
 /# wget -O- intro-app-svc.default
 /# wget -O- intro-app-svc.default.svc
-/# wget -O- kubernetes-dashboard.kube-system
+
+/# wget -O- traefik.kube-system
 \end{verbatim}%
 
 By the way, the service info is also injected as environment variables. I did not have so far a need to use this information:%
@@ -645,7 +647,7 @@ Avoid editing files on kubernetes, always modify a yaml and apply the changes.
 1. Change the number of pods running to 2 with:
 
 \begin{verbatim}
-$ kubectl edit deploy
+$ kubectl edit deploy YOUR_DEPLOYMENT
 \end{verbatim}
 
 \begin{verbatim}
@@ -656,7 +658,7 @@ $ kubectl get po
 2. Change the value of label \verb|me| to your name in the service definition.
 
 \bigskip
-3. Modify the \verb|depoyment.yml| to get 3 pods, use: \texttt{kubectl apply -f}
+3. Modify the \verb|kube-deployment.yml| to get 3 pods, use: \texttt{kubectl apply -f}
 
 \bigskip
 4. Add one more label to service.
@@ -693,10 +695,10 @@ Notice: {\large very very very common issue} that selectors do not match labels.
 Let's update our app from the version \verb|1.0.0| to \verb|2.0.0|:
 
 \bigskip
-1. Change in the deployment file and apply changes.
+1. Change in the \verb|kube-deployment.yaml| and apply changes.
 
 \bigskip
-2. You can also change it with set image:
+2. You can also change it with set image setting the image by the {\small CLI}\footnote{hint: \mintinline{bash}{$ kubectl get deploy -o wide}}:
 
 \begin{verbatim}
 $ kubectl set image deployment/<DEPLOYMENT_NAME> \
@@ -708,6 +710,13 @@ $ kubectl set image deployment/<DEPLOYMENT_NAME> \
 
 \begin{verbatim}
 $ curl -s -D - 127.0.0.1:8080
+\end{verbatim}
+
+\bigskip
+4. Let's scale it up: 
+
+\begin{verbatim}
+$ kubectl scale --replicas=2 deployment/intro-app-deploy
 \end{verbatim}
 
 %%%%%%%%%%
@@ -734,7 +743,7 @@ In most of scenarios, you will use the ingress controller, so we will have:
 \node[draw, minimum width=4cm,minimum height=1cm,
       text width=4cm, align=center] (IC) [below=of LB]  {\textbf{Ingress Controller}};
 
-\node[draw, minimum width=4cm,minimum height=1cm, 
+\node[draw, minimum width=4cm,minimum height=1cm,
       text width=4cm, align=center,
       label=below:$routing\ rule$] (IR) [right=of IC] {\textbf{intro-app-ing} \\ Ingress};
 
@@ -1042,7 +1051,7 @@ Hint: below\footnote{\mintinline{bash}{printf nomoresecrets | base64}}
 \end{minted}
 
 \bigskip
-3. Please deliver \verb|cert.crt| to your application and mount it at \verb|/usr/secet|, find how to do it find on\\ \href{https://kubernetes.io/docs/concepts/configuration/secret/}{kubernetes.io/docs/concepts/configuration/secret/} :
+3. Please deliver \verb|cert.crt| to your application and mount it at \verb|/usr/secret|, find how to do it find on\\ \href{https://kubernetes.io/docs/concepts/configuration/secret/}{kubernetes.io/docs/concepts/configuration/secret/} :
 
 \begin{verbatim}
 $ echo "CERT" > cert.crt
@@ -1050,12 +1059,24 @@ $ kubectl create secret generic intro-app-cert \
     --from-file cert.crt
 \end{verbatim}
 
-% 
+%
 \section{Your own app}
+We have prepared two simple application in Python and Golang, your task is to deploy one of them on the Kubernetes cluster. Let's use docker hub for hosting our image. For this purpose please create an user on \href{https://hub.docker.com}{hub.docker.com}.
 
-We have prepared two simple application in Python and Golang, your task is to deploy them on the Kubernetes cluster. Please create an user on \href{https://hub.docker.com}{hub.docker.com}:
+\bigskip
+Before please delete all the resources from the previous exercises:
 
-Applications (see in the \verb|examples| directory):
+\begin{minted}{bash}
+# find resources we created so far and delete them:
+$ kubectl get ingress
+$ kubectl get svc
+$ kubectl get deploy
+$ kubectl get cm
+$ kubectl get secret
+\end{minted}
+
+
+Chose one applications (see in the \verb|exercise| directory):
 
 \begin{itemize}
 \item Python
@@ -1064,17 +1085,25 @@ Applications (see in the \verb|examples| directory):
 
 Create, following the instruction from the trainer, Kubernetes resources to run the app\footnote{Probably we should use here the {\small DSN} (Data Source Name) to define the connectio to the database. What are challenges of using {\small DSN} in {\small K8S}?}:
 
-\begin{markdown}
-1. Deployment with DB_USERNAME as an env variable
-2. ConfigMap with a field DB_NAME and DB_PORT
-3. Secret
-3. Service
-4. Ingress, path: `/hello` to `/`
-\end{markdown}
+\begin{itemize}
+\item Deployment with {\small MGO\_USERNAME} as an env variable
+\item ConfigMap with a field {\small MGO\_NAME} and {\small MGO\_PORT}
+\item Secret for {\small MGO\_PASSWORD}
+\item Service
+\item Ingress: path \verb|/hello| to \verb|/|
+\item Ingress: path \verb|/hostname| to \verb|/hostname|
+\end{itemize}%
+
+Please test whether you can call your application:
+
+\begin{verbatim}
+$ curl "http://127.0.0.1:8000/hello"
+$ curl "http://127.0.0.1:8000/hostname"
+\end{verbatim}
 
 %
 \section{Quick look on the configuration management}
-We will cover it in a separate workshop (that covers {\small CI}/{\small CD}), here is a quick start.%
+We will cover {\small CI}/{\small CD} in a separate workshop, here is a quick start.%
 
 \begin{markdown}
 1. envsubst or similar approaches
@@ -1082,7 +1111,7 @@ We will cover it in a separate workshop (that covers {\small CI}/{\small CD}), h
 3. Helm
 \end{markdown}
 
-Let's see each of these popular approaches. 
+Let's see each of these popular approaches.
 
 \bigskip
 1. envsubst or similar approach. Let's imagine, we want to generate ingress resources with differenet host names:
@@ -1110,7 +1139,7 @@ $ export HOST=example.com
 $ envsubst < my-k8s.tmpl.yaml > my-k8s.yaml
 \end{verbatim}
 
-\bigskip
+\pagebreak
 2. kustomize - overlay:
 \begin{verbatim}
 .
@@ -1173,7 +1202,7 @@ Lean towards:
 
 1. Not templating if it is not going to change.
 2. Push as many setting as possible to the component repo.
-3. It is OK, if you create Kubernetes secrets manually in the beggining.
+3. It is OK, if you create Kubernetes secrets manually in the beginning.
 \end{markdown}
 
 \section{Next}
@@ -1201,7 +1230,7 @@ Next course *Intermediate (Developer)*:
 4. Statefulsets
 5. DaemonSets
 6. Taints and Tolerations
-7. Node affinity 
+7. Node affinity
 
 *Observability plus*:
 
@@ -1219,7 +1248,7 @@ Next course *Intermediate (Developer)*:
 
 1. Zero-downtime deployment strategies
 2. Horizontal scaling (beta: vertical pod scaling for the pets)
-3. Continuous Deployment and Integration with Gitlab or other tool 
+3. Continuous Deployment and Integration with Gitlab or other tool
 
 *Network and Security*:
 
