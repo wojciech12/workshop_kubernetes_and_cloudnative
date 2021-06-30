@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ocr
+  labels:
+    app: ocr
+    tier: backend
+spec:
+  replicas: <REPLICAS>
+  selector:
+    matchLabels:
+      app: ocr
+  template:
+    metadata:
+      labels:
+        name: ocr
+        app: ocr
+        tier: backend
+    spec:
+      containers:
+      - name: ocr-server
+        image: "wojciech11/api-status:<VERSION>"
+        resources:
+          requests:
+            cpu: <CPU_REQUESTS>
+            memory: <MEM_REQUESTS>
+          limits:
+            cpu: 4
+            memory: 4096Mi
+        ports:
+        - containerPort: 80
+        

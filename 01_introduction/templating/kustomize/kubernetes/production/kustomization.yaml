@@ -1,0 +1,8 @@
+commonLabels:
+  env: production
+bases:
+  - ../base
+patches:
+  - scale.yaml
+  - image.yaml
+  - host.yaml

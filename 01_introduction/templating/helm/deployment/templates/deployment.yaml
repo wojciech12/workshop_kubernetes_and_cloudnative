@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: intro-app-deploy
+  labels:
+    helm_name: "{{ .Chart.Name }}"
+  namespace: intro-app
+spec:
+  replicas: {{ .Values.appReplicas }}
+  selector:
+    matchLabels:
+      app: intro-app
+  template:
+    metadata:
+      labels:
+        app: intro-app
+    spec:
+      containers:
+      - name: app
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        env:
+          - name: DB_NAME
+            value: user
+          - name: LOG_LEVEL
+            value: {{ .Values.logLevel }}  
+        ports:
+        - containerPort: 80

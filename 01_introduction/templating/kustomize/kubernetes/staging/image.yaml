@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ocr
+spec:
+  template:
+    spec:
+      containers:
+      - name: ocr-server
+        image: wojciech11/api-status:1.0.0

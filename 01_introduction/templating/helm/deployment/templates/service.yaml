@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: intro-app-svc
+  labels:
+    me: wojtek
+  namespace: intro-app
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: intro-app

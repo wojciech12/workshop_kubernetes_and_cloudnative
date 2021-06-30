@@ -1,0 +1,9 @@
+image:
+  repository: wojciech11/api-status
+  tag: latest
+
+appReplicas: 1
+
+hostName: ""
+
+logLevel: DEBUG

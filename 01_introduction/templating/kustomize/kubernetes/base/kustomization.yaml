@@ -1,0 +1,5 @@
+resources:
+  - kube-deployment.yaml
+  - kube-ingress.yaml
+  - kube-service.yaml
+  - traefik-stripprefix.yaml

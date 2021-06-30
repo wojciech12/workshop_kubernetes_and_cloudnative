@@ -1,0 +1,4 @@
+appReplicas: 1
+logLevel: DEBUG
+
+hostName: staging-my.example.com

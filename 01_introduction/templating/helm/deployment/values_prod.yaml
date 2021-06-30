@@ -1,0 +1,4 @@
+appReplicas: 3
+logLevel: INFO
+
+hostName: my.example.com

@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ocr-ing
+spec:
+  rules:
+  - host: ocr.example.com
+    http:
+      paths:
+        - path: /extract
+          pathType: Prefix
+          backend:
+            service:
+              name: ocr
+              port:
+                number: 80

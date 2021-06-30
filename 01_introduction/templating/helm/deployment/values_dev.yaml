@@ -1,0 +1,4 @@
+appReplicas: 2
+logLevel: DEBUG
+
+hostName: dev-my.example.com

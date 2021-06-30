@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ocr
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: ocr-server
+        env:
+        - name: MODEL
+          value: /dev/model
+        resources:
+          requests:
+            cpu: 1
+            memory: 50Mi 
+          limits:
+            cpu: 1
+            memory: 100Mi
