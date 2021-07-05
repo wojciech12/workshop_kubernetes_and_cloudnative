@@ -1,6 +1,5 @@
 ## Best Practices
 
-
 1. Use a Docker linter, for example [hadolint](https://github.com/hadolint/hadolint) or [dockle](https://github.com/goodwithtech/dockle):
 
     ```
@@ -9,7 +8,7 @@
 
     You do not need neccessary to run it on CI/CD on every commit. It could be a async job checking your repo.
 
-2. Minimal images
+2. Minimal images:
 
    - [ubuntu](https://hub.docker.com/_/ubuntu/)
    - [alpine](https://hub.docker.com/_/alpine)
@@ -22,9 +21,7 @@
 
 4. Use a specific tag for your base docker image. Do not use *latest*.
 
-5. Let CI/CD to generate the tag for the version.
-
-6. Reduce the number of layers.
+5. Reduce the number of layers.
 
    What is the difference?
 
@@ -35,30 +32,30 @@
    vs
 
    <pre><code>RUN apt-get -y update
-      RUN apt-get install -y python
+   RUN apt-get install -y python
    </code></pre>
 
    Notice: every <i>RUN</i>, <i>COPY</i>, <i>ADD</i> create a layer.
 
-7. Reduce the size:
+6. Reduce the size:
 
    - Be specific what you copy - <i>COPY</i>
    - Do not install, what you do not need, e.g., use <code>-no-install-recommends</code> for apt
    - Remove the cache in the same run as install:
 
      <pre><code>RUN apt-get -y update \
-      && apt-get install -y vim \
+      && apt-get install -no-install-recommends -qq vim \
       rm -rf /var/lib/apt/lists/*
      </code></pre>
 
-8. Order! Things that changes the most often should be the last to be added.
+7. Order! Things that changes the most often should be the last to be added.
 
-9. Development time: 
+8. Development time:
    
    - optimize the Docker to your work, do not be afraid to add as many layers as you need to speed up your development process. 
    -  Mount your source code or binary inside the docker when you work on your machine. Now, you can just restart Docker on your machine to have new version of your code running.
 
-10. Do you need to access a private git repositories inside Docker?
+9. Do you need to access a private git repositories inside Docker?
 
     <pre><code>docker build -t my_docker . \
     -f Dockerfile \
@@ -67,13 +64,13 @@
 
     and multistage.
 
-11. Use Multi-stage builds if possible, see [example](multi-stage/).
+10. Use Multi-stage builds if possible, see [example](multi-stage/).
 
-12. Try not to run your application as a <i>root</i> user.
+11. Try not to run your application as a <i>root</i> user.
 
-13. Mountable secrets for building Docker Images (beta), see [example](secret-mount).
+12. Mountable secrets for building Docker Images (beta), see [example](secret-mount).
 
-14. Others:
+13. Others:
 
     - rebuild your base images / pull new ones
     - security scanner

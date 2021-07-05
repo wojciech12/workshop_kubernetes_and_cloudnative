@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: intro-app-ing
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: default-intro-app-ing@kubernetescrd
+spec:
+  rules:
+  - host: my.app
+    http:
+      paths:
+        - path: /echo
+          pathType: Prefix
+          backend:
+            service:
+              name: intro-app-svc
+              port:
+                number: 8080
