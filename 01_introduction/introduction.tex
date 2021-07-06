@@ -227,25 +227,6 @@ Your kubectl configuration is in \verb|${HOME}/.kube/config|, it contains tokens
 % clusters
 % contexts
 % users
-\pagebreak
-\section{Task at Hand}
-
-Our goal today will be deployment of \verb|intro-app| on Kubernetes. It is a simple web service. We will start with learning about the Kubernetes deployment and service as shown on the picture.
-
-\begin{figure}[ht]
-\centering
-\begin{tikzpicture}
-\node[draw,minimum width=4cm,minimum height=1cm, text width=2cm, align=center, label=right:$interfejs$] (S){\textbf{my-app} service};
-
-\node[draw,minimum width=4cm,minimum height=1cm, text width=2cm, align=center, label=right:$factory$] (D) [below =of S] {\textbf{my-app} \\ deployment};
-
-\draw [-, thick, dotted]  (S.south) -- (D.north) node[midway, left] {\large{?}};
-
-\end{tikzpicture}
-\end{figure}
-
-
-%We need to deploy \verb|intro-app| on kubernetes. Users will acess this application on \verb|my.app/echo|. Please help us, our next finanse round depens on it!
 
 \section{What are the namespaces?}
 Let us see first how to organize our apps in the Kubernetes with \verb|namespaces|.
@@ -281,9 +262,28 @@ $ kubectl get po -n default
 
 Notice: you can check \verb|kubectl api-resources| to see which resources are namespaced and which not.
 
-%
-%
 \pagebreak
+\section{Task at Hand}
+
+Our goal today will be deployment of \verb|intro-app| on Kubernetes. It is a simple web service. We will start with learning about the Kubernetes deployment and service as shown on the picture.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\node[draw,minimum width=4cm,minimum height=1cm, text width=2cm, align=center, label=right:$interfejs$] (S){\textbf{my-app} service};
+
+\node[draw,minimum width=4cm,minimum height=1cm, text width=2cm, align=center, label=right:$factory$] (D) [below =of S] {\textbf{my-app} \\ deployment};
+
+\draw [-, thick, dotted]  (S.south) -- (D.north) node[midway, left] {\large{?}};
+
+\end{tikzpicture}
+\end{figure}
+
+
+%We need to deploy \verb|intro-app| on kubernetes. Users will acess this application on \verb|my.app/echo|. Please help us, our next finanse round depens on it!
+
+%
+%
 \section{Kubernetes deployment yaml}
 
 Let's get instances of our application running. We use an application docker image built on the top of official nginx (\href{https://hub.docker.com/\_/nginx}{hub.docker.com/\_/nginx}), you will find Dockerfiles in \texttt{manifests/dockers}.
@@ -433,18 +433,17 @@ kubectl port-forward <POD_NAME> <LOCAL_PORT_NUMBER>:<POD_PORT_NUMBER>
 \end{verbatim}
 
 \begin{verbatim}
-# let's choose 8080 as the local port
-$ kubectl port-forward <POD_NAME> 8080:<POD_PORT_NUMBER>
+# let's choose 7000 as the local port
+$ kubectl port-forward <POD_NAME> 7000:<POD_PORT_NUM>
 
 # in a separate terminal:
-$ curl 127.0.0.1:8080
-
+$ curl 127.0.0.1:7000
 <html>
 <h1>1.0.0</h1>
 </html>
 
 # if you prefer httpie (httpie.io)
-$ http 127.0.0.1:8080
+$ http 127.0.0.1:7000
 \end{verbatim}
 
 \smallskip

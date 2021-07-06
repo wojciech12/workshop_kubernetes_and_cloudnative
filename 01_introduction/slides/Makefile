@@ -1,4 +1,4 @@
-DECKTAPE_VERSION=2
+DECKTAPE_VERSION=3
 
 give_me_pdf:
 	docker run --rm -v $$(pwd):/slides \

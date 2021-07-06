@@ -1,0 +1,166 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Kubernetes CD Basics</title>
+
+		<!-- bootstrap -->
+		<link rel="stylesheet" href="ext/bootstrap-4.1.3/css/bootstrap.css">
+
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/black.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h3>C<span style="text-transform: lowercase;">ontinuous</span> D<span style="text-transform: lowercase;">eployment <br />with</span> K<span style="text-transform: lowercase;">ubernetes <br/> basics</span></h3>
+
+					<!-- img src="img/GopherKubernetes.png" class="center-block" style="background-color:white;border:0;width: 80%"/ -->
+					<!-- h5>+ how to prepare your service</h5 -->
+					<br />
+
+					<h6><small>W<span style="text-transform: lowercase;">ojciech</span> B<span style="text-transform: lowercase;">arczyński</span><br />
+							<span style="text-transform: lowercase;">wbarczynski.pro@gmail.com</span></small>
+				</section>
+
+				<section>
+					<h3>W<span style="text-transform: lowercase;">hy </span> <span style="text-transform: lowercase;"></span></h3>
+					<div class="container">
+						<div class="row">
+							<div class='col-md-6'>
+								<ul>
+									<li><b style="color:#FF8C00">Lead Time</b></li>
+									<li><b style="color:#FF8C00">Deployment Frequency</b></li>
+									<li>Mean Time to Recovery</li>
+									<li>Change to Fail</li>
+								</ul>
+							</div>
+							<div class='col-md-5'>
+								<img src="https://m.media-amazon.com/images/I/51CjXuVck+L.jpg" width="80%" />
+							</div>
+						</div>
+						<div class="row">
+							<div class='col-md-11'>
+								<small>See also <a href="https://www.amazon.com/DevOps-Handbook-World-Class-Reliability-Organizations/dp/1942788002">DevOps Handbook</a> and <a href="https://www.amazon.com/Practice-Cloud-System-Administration-Practices/dp/032194318X">Pracice of Cloud Sys Administrator</a></small>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<h3>P<span style="text-transform: lowercase;">rinciples</span></h3>
+
+- CD starts at the developer workstation
+- every dev and tool do things the same way ([parity](https://12factor.net/dev-prod-parity))
+					</script>
+				</section>
+
+
+
+				<section data-markdown>
+					<script type="text/template">
+<h3>B<span style="text-transform: lowercase;">asics</span></h3>
+
+- CD starts at the developer workstation
+- every dev and tool do things the same way ([parity](https://12factor.net/dev-prod-parity))
+					</script>
+				</section>
+
+
+				<section data-markdown>
+					<script type="text/template">
+<h3>B<span style="text-transform: lowercase;">asics</span></h3>
+<img src="img/everybody_the_same_way.svg" style="width:70%">
+
+<small>Makefile or your tool of choice</small>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<h3>B<span style="text-transform: lowercase;">asics</span></h3>
+
+As in developement, we fight the complexity:
+
+- decoupling
+- cutting dependencies
+- removing dead code
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<h3>B<span style="text-transform: lowercase;">asics</span></h3>
+
+<pre><code>|-.gitlabci/
+|    \- ...
+|           	
+|- deployment
+|    |- kube-service.yaml
+|    \- kube-deployment.yaml
+|
+|- tools/
+|    \- Makefile.ext
+|
+|- Dockerfile
+\- Makefile</code></pre>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+### Iteration 1
+- helm or kustomize
+
+					</script>
+				</section>
+
+
+				<section data-markdown>
+					<script type="text/template">
+### Iteration 2
+
+- helm
+					</script>
+				</section>
+
+
+				<section data-markdown>
+					<script type="text/template">
+### Iteration 3
+
+- helm + ...
+					</script>
+				</section>
+
+				<section>Slide 1</section>
+				<section>Slide 2</section>
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>

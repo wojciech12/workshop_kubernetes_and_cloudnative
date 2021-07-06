@@ -1,0 +1,777 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>App Development</title>
+
+		<!-- bootstrap -->
+		<link rel="stylesheet" href="ext/bootstrap-4.1.3/css/bootstrap.css">
+
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/black.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h3>C<span style="text-transform: lowercase;">ontinuous</span> D<span style="text-transform: lowercase;">eployment <br />with</span> K<span style="text-transform: lowercase;">ubernetes <br/> basics</span></h3>
+
+					<!-- img src="img/GopherKubernetes.png" class="center-block" style="background-color:white;border:0;width: 80%"/ -->
+					<!-- h5>+ how to prepare your service</h5 -->
+					<br />
+
+					<h6><small>W<span style="text-transform: lowercase;">ojciech</span> B<span style="text-transform: lowercase;">arczyński</span><br />
+							<span style="text-transform: lowercase;">wbarczynski+trainings@gmail.com</span></small>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### Start
+
+- minimum deployment, service, configmap, and secrets
+- learn-as-you-go
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### Start
+
+1. Structured logs
+2. Liveness
+3. Liveness and readiness
+4. Prometheus metrics
+5. Zero-downtime deployment
+					</script>
+				</section>
+
+<!--
+12factor apps
+-->
+				<section data-markdown>
+					<script type="text/template">
+#### 12factor apps
+
+- Good to know what [12factorapp](https://12factor.net) is.
+- 12factor is not new, so you might find points obvious.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### 12factor apps
+
+Few that are very relevant for Kubernetes:
+
+1. III. [Config](https://12factor.net/config) - environment variable, injected by environment
+2. VIII. [Concurrency by process](https://12factor.net/concurrency)
+3. IX. [Disposability](https://12factor.net/disposability)
+
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### 12factor apps
+
+4. X. [Dev/Prod parity](https://12factor.net/dev-prod-parity) including time, tooling, and backing services
+5. XI. [Logs](https://12factor.net/logs) - push your logs to stdout and let log routers to take care of them
+					</script>
+				</section>
+
+
+<!--
+CI/CD ref
+-->
+				<section data-markdown>
+					<script type="text/template">
+#### C<span style="text-transform: lowercase;">ontinuous</span> D<span style="text-transform: lowercase;">eployment</span>
+
+- start at the
+- see [Continuous Deployment slides](file://../../03_continuous_deployment/slides/index.html)
+					</script>
+				</section>
+
+<!--
+LIVENESS AND READINESS PROBES
+-->
+				<section data-markdown>
+					<script type="text/template">
+#### P<span style="text-transform: lowercase;">robes</span>
+
+- liveness - am I dead?
+- readiness - can I serve requests?
+
+<small>[slides on zero-downtime deployments](https://github.com/wojciech12/talk_zero_downtime_deployment_with_kubernetes)</small>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### P<span style="text-transform: lowercase;">robes</span>
+
+- deployment, statefulsets, daemonsets
+- self-healing
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### L<span style="text-transform: lowercase;">iveness</span> P<span style="text-transform: lowercase;">robe</span>
+
+<pre><code class="language-yaml">livenessProbe:
+  httpGet:
+    path: /model
+    port: 8000
+    httpHeaders:
+      - name: X-Custom-Header
+        value: Awesome
+  initialDelaySeconds: 600
+  periodSeconds: 5
+  timeoutSeconds: 18
+  successThreshold: 1
+  failureThreshold: 3</code></pre>
+
+<small>[k8s docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)</small>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### L<span style="text-transform: lowercase;">iveness</span> P<span style="text-transform: lowercase;">robe</span>
+
+- pod gets restarted
+- too many restarts = CrashLoop  
+
+<small>[k8s docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)</small>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### L<span style="text-transform: lowercase;">iveness</span> P<span style="text-transform: lowercase;">robe</span>
+
+- I am dead
+- My dependencies are dead &#8594; Readiness probe
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### L<span style="text-transform: lowercase;">iveness</span> P<span style="text-transform: lowercase;">robe</span>
+
+- Good to detect that we do not respond
+- We can actively set it up (less common)
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### R<span style="text-transform: lowercase;">eadiness</span> P<span style="text-transform: lowercase;">robe</span>
+
+<pre><code>readinessProbe:
+  exec:
+    command:
+    - cat
+     - /tmp/healthy
+  initialDelaySeconds: 5
+  periodSeconds: 5</code></pre>
+
+<small>[k8s docs](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)</small>
+					</script>
+				</section>
+
+
+				<section data-markdown>
+					<script type="text/template">
+#### R<span style="text-transform: lowercase;">eadiness</span> P<span style="text-transform: lowercase;">robe</span>
+
+- temporary cannot server traffic
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### C<span style="text-transform: lowercase;">annot</span> S<span style="text-transform: lowercase;">erve</span> T<span style="text-transform: lowercase;">raffic</span>
+
+- loading or reloading ML model
+- stop getting requests before shutdown
+- our deps are dead*
+
+<small>[*] after retries, usually the app kills itself.</small>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### P<span style="text-transform: lowercase;">robes best practices</span>
+
+- lightweight
+- SHOULD NOT call external components
+
+<small>[Pod lifecycle](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)</small>
+					</script>
+				</section>
+
+
+<!--
+ZERO DOWNTIME DEPLOYMENTS
+-->
+				<section data-markdown>
+					<script type="text/template">
+### Z<span style="text-transform: lowercase;">ero-downtime deployments</span>
+					</script>
+				</section>
+
+
+				<section data-markdown>
+					<script type="text/template">
+#### Y<span style="text-transform: lowercase;">our app should on stop</span>
+
+1. we get SIGTERM signal
+
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### Y<span style="text-transform: lowercase;">our app should on stop</span>
+
+1. we get SIGTERM signal
+2. app MUST make readinessProbe fail
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### Y<span style="text-transform: lowercase;">our app should on stop</span>
+
+1. we get SIGTERM signal
+2. app MUST make readinessProbe fail
+3. k8s does not send more requests
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### Y<span style="text-transform: lowercase;">our app should on stop</span>
+
+1. we get SIGTERM signal
+2. app MUST make readinessProbe fail
+3. k8s does not send more requests
+4. app shuts down gracefully
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+#### Y<span style="text-transform: lowercase;">our app should on stop</span>
+
+1. we get SIGTERM signal
+2. app gives 500 on readinessProbe
+3. k8s does not send more requests
+4. app shuts down gracefully
+5. kubernetes forces kill if 30s limit exceeded
+					</script>
+				</section>
+
+
+				<!-- section data-markdown>
+					<script type="text/template">
+#### Zero<span style="text-transform: lowercase;"></span> D<span style="text-transform: lowercase;">owntime?</span>
+
+					</script>
+				</section -->
+
+				<section data-markdown>
+					<script type="text/template">
+#### Graceful shutdown
+
+<pre><code class="language-go">func (s *Service) prepareShutdown(h Server) {
+	signal.Notify(s.Stop, os.Interrupt, syscall.SIGTERM)
+	<-s.Stop
+	s.StatusNotReady()
+	shutdown(h)
+}
+</code></pre>
+
+<small>from <a href="https://github.com/microdevs/missy">missy</a></small>
+					</script>
+				</section>
+
+
+				<section data-markdown>
+					<script type="text/template">
+## D<span style="text-transform: lowercase;">eployment</span> S<span style="text-transform: lowercase;">trategies</span>
+
+Demos and examples of the implementation:<br /> [zero-downtime deployments](https://github.com/wojciech12/talk_zero_downtime_deployment_with_kubernetes)
+					</script>
+				</section>
+
+<!--
+####################
+OBSERVABILITY
+####################
+-->
+				<section>
+					<h2>O<span style="text-transform: lowercase;">bservability</span></h2>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+### O<span style="text-transform: lowercase;">bservability</span>
+
+- logging / sentry
+- monitoring
+- tracking
+					</script>
+				</section>
+
+
+				<section>
+					<h3>Why?</h3>
+					<h4>Monolit ;) </h4>
+					<img src="img/observability/rubber_duck_monolit.jpg" width="80%">
+				</section>
+						
+				<section>
+					<h3>Why?</h3>
+					<h4>Microservices ;) </h4>
+					<img src="img/observability/rubber_duck_microservices.jpg" width="70%">
+				</section>
+
+				<section>
+					<h4>O<span style="text-transform: lowercase;">bservability</span></h4>
+					<img src="img/observability/observability_capex_vs_opex_from_golang_prod_blog.png" width="80%" />
+
+					<small><a href="https://peter.bourgon.org/go-for-industrial-programming/">Go for Industrial Programming by Peter Bourgon</a></small>
+				</section>
+
+<!--
+logging
+-->
+				<section data-markdown>
+					<script type="text/template">
+## A<span style="text-transform: lowercase;">pp</span> L<span style="text-transform: lowercase;">ogs</span>
+
+Before we dive into observability.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+### A<span style="text-transform: lowercase;">pp</span> L<span style="text-transform: lowercase;">ogs</span>
+
+- structured
+- support setting LOG_LEVEL[*] per env
+
+<small>[*] Deployment manifest.</small>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+### L<span style="text-transform: lowercase;">ogs</span> - G<span style="text-transform: lowercase;">olang</span>
+
+- [logrus](https://github.com/sirupsen/logrus)
+- [uber-go/zap](https://github.com/uber-go/zap)
+
+<small>Pass logger in the context.</small>
+					</script>
+				</section>
+				<!-- https://dave.cheney.net/2015/11/05/lets-talk-about-logging -->
+
+				<section data-markdown>
+					<script type="text/template">
+### L<span style="text-transform: lowercase;">ogs</span> - P<span style="text-transform: lowercase;">ython</span>
+
+- [structlog](https://github.com/hynek/structlog)
+- [loguru](https://github.com/Delgan/loguru)
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+### F<span style="text-transform: lowercase;">ieds</span>
+
+What do you think?
+
+- url, retries, error code
+- ?
+					</script>
+				</section>
+
+
+				<section data-markdown>
+					<script type="text/template">
+## C<span style="text-transform: lowercase;">entralized</span> L<span style="text-transform: lowercase;">ogging</span>
+
+- ElasticSearch
+- Fluentd
+- Kibana
+
+<small>Worth following: <a href="https://github.com/grafana/loki">Loki</a></small>
+					</script>
+				</section>
+				<!-- https://github.com/wojciech12/talk_observability_logging -->
+
+				<section data-markdown>
+					<script type="text/template">
+## C<span style="text-transform: lowercase;">entralized</span> L<span style="text-transform: lowercase;">ogging</span>
+
+- Debugging tool
+- Post-mortem
+- Finding the needle
+- High TCO
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## S<span style="text-transform: lowercase;">entry</span>
+					</script>
+				</section>
+
+<!--
+Monitoring
+https://github.com/wojciech12/talk_monitoring_with_prometheus
+-->
+				
+				<section>
+					<h3>M<span style="text-transform: lowercase;">onitoring</span></h3>
+					<h4>S<span style="text-transform: lowercase;">aa</span>S / C<span style="text-transform: lowercase;">loud</span></h4>
+				</section>
+
+				<section>
+					<h4>Metric</h4>
+
+					<table class="table">
+						 <thead>
+							 <tr>
+								 <th style="text-align: center;">Name</th>
+								 <th style="text-align: center;">Label</th>
+								 <th style="text-align: center;">Value</th>
+							 </tr>
+						 </thead>
+						 <tbody>
+							 <tr class="success">
+								 <td>traefik_requests_total</td>
+								 <td>code="200", method="GET"</td>
+								 <td>3001</td>
+							 </tr>
+						 </tbody>
+					</table>
+					<small>from <a href="https://github.com/wojciech12/talk_monitoring_with_prometheus">slides</a></small>
+				</section>
+
+				<section>
+					<h4>How to find the right metric?</h4>
+					<h5>
+						<ul>
+							<li>RED</li>
+							<li>USE</li>
+						</ul>
+					</h5>
+				</section>
+
+				<section>
+					<h4>How to find the right metric?</h4>
+					<ul>
+						<li>Measure from the client experience</li>
+						<li>Alert on the client experience</li>
+					</ul>
+				</section>
+
+				<section>
+					<h4>Low level metrics</h4>
+					<ul>
+						<li>It is not onPremise :)</li>
+						<li>Yes, if they correlate with experience [*]</li>
+					</ul>
+					<small>[*] see saturation in <a href="https://sre.google/sre-book/monitoring-distributed-systems/#xref_monitoring_golden-signals">4 Golden signals</a></small>
+				</section>
+
+
+				<section data-markdown><!-- workload -->
+					<script type="text/template">
+## RED
+
+<table class="table">
+	 <tbody>
+		 <tr>
+			 <td><b>R</b>ate</td>
+			 <td>How busy is your service?</td>
+		 </tr>
+		 <tr>
+			 <td><b>E</b>rror</td>
+			 <td>Errors</td>
+		 </tr>
+		 <tr>
+			 <td><b>D</b>uration </td>
+			 <td>What is the latency of my service?</td>
+		 </tr>
+	 </tbody>
+ </table>
+<center><small> <a href="https://twitter.com/i/web/status/852341680946544640">Tom Wilkie's guideline for instrumenting applications</a>.</small></center>
+					</script>
+				</section>
+
+				<section data-markdown><!-- workload -->
+					<script type="text/template">
+## RED
+
+- **Rate** - how many request per seconds handled
+- **Error**
+- **Duration** (distribution)
+					</script>
+				</section>
+
+				<section data-markdown><!-- workload -->
+					<script type="text/template">
+## RED
+
+- **Rate**
+- **Error** - how many request per seconds handled we failed
+- **Duration**
+					</script>
+				</section>
+
+				<section data-markdown><!-- workload -->
+					<script type="text/template">
+## RED
+
+- **Rate**
+- **Error**
+- **Duration** - how long the requests took
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## RED
+
+- Follow Four Golden Signals by Google SREs [1]
+- Focus on what matters for end-users
+
+<center><small>[1] Latency, Traffic, Errors, Saturation (<a href="https://landing.google.com/sre/book/chapters/monitoring-distributed-systems.html">src</a>)</small></center>
+					</script>
+				</section>
+
+				<section data-markdown><!-- workload -->
+					<script type="text/template">
+## RED
+
+Not recommended for:
+
+- batch-oriented
+- streaming services
+ 					</script>
+ 				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## USE
+
+<table class="table">
+	<tbody>
+		<tr>
+			<td><b>U</b>tilization</td>
+			<td>the average time that the resource was busy servicing work</td>
+		</tr>
+		<tr>
+			<td><b>S</b>aturation</td>
+			<td>extra work which it can't service, often queued</td>
+		</tr>
+		<tr>
+			<td><b>E</b>rrors</td>
+			<td>the count of error events</td>
+		</tr>
+	</tbody>
+</table>
+
+<small>Documented by <a href="http://www.brendangregg.com/usemethod.html">Berdan Gregg</a></small>
+<!-- Famous Shouting in the Datacenter - https://www.youtube.com/watch?v=tDacjrSCeq4 -->
+					</script>
+				</section>
+
+		<section data-markdown>
+			<script type="text/template">
+## USE
+
+- <b>U</b>tilization: as a percent over a time interval:<br />"one disk is running at 90% utilization".
+- <b>S</b>aturation:
+- <b>E</b>rrors:
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## USE
+
+- **Utilization**:
+- **Saturation**: as a queue length, e.g.,<br />"the CPUs have an average run queue length of four".
+- **Errors**:
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## USE
+
+- **utilization**:
+- **saturation**:
+- **errors**: scalar counts, e.g.,<br />"this network interface drops packages".
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+## USE
+
+- **traditionaly** more instance oriented
+- still useful in the microservices world
+					</script>
+				</section>
+
+
+				<section data-markdown>
+					<script type="text/template">
+## M<span style="text-transform: lowercase;">onitoring with</span> <span style="text-transform: lowercase;">Prometheus</span>
+
+- Slides: [github.com/wojciech12/talk_monitoring_with_prometheus](github.com/wojciech12/talk_monitoring_with_prometheus)
+- Prometheus naming conventions: [docs](https://prometheus.io/docs/practices/naming/)
+					</script>
+				</section>
+
+
+				<section data-markdown>
+					<script type="text/template">
+<h3>Q<span style="text-transform: lowercase;">uestions?</span></h3>
+
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<h3>S<span style="text-transform: lowercase;">urvey</span></h3>
+
+Your feedback is important:
+
+- TBA
+					</script>
+				</section>
+
+
+				<!-- section data-markdown>
+					<script type="text/template">
+<h3>P<span style="text-transform: lowercase;">rinciples</span></h3>
+
+- CD starts at the developer workstation
+- every dev and tool do things the same way ([parity](https://12factor.net/dev-prod-parity))
+					</script>
+				</section -->
+
+
+
+				<!-- section data-markdown>
+					<script type="text/template">
+<h3>B<span style="text-transform: lowercase;">asics</span></h3>
+
+- CD starts at the developer workstation
+- every dev and tool do things the same way ([parity](https://12factor.net/dev-prod-parity))
+					</script>
+				</section -->
+
+
+				<!-- section data-markdown>
+					<script type="text/template">
+<h3>B<span style="text-transform: lowercase;">asics</span></h3>
+<img src="img/everybody_the_same_way.svg" style="width:70%">
+
+<small>Makefile or your tool of choice</small>
+					</script>
+				</section -->
+
+				<!-- section data-markdown>
+					<script type="text/template">
+<h3>B<span style="text-transform: lowercase;">asics</span></h3>
+
+As in developement, we fight the complexity:
+
+- decoupling
+- cutting dependencies
+- removing dead code
+					</script>
+				</section -->
+
+				<!-- section data-markdown>
+					<script type="text/template">
+<h3>B<span style="text-transform: lowercase;">asics</span></h3>
+
+<pre><code>|-.gitlabci/
+|    \- ...
+|           	
+|- deployment
+|    |- kube-service.yaml
+|    \- kube-deployment.yaml
+|
+|- tools/
+|    \- Makefile.ext
+|
+|- Dockerfile
+\- Makefile</code></pre>
+					</script>
+				</section -->
+
+				<!-- section data-markdown>
+					<script type="text/template">
+### Iteration 1
+- helm or kustomize
+
+					</script>
+				</section -->
+
+
+				<!-- section data-markdown>
+					<script type="text/template">
+### Iteration 2
+
+- helm
+					</script>
+				</section -->
+
+
+				<!-- section data-markdown>
+					<script type="text/template">
+### Iteration 3
+
+- helm + ...
+					</script>
+				</section -->
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>

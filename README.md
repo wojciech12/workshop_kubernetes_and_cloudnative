@@ -22,8 +22,8 @@
 
 3. Basics CI/CD - how to work with manifests and how to generate them.
 
-   - [workshop manual](03_Continuous_Deployment_basics/README.md)
-   - [slides](03_Continuous_Deployment_basics/slides/index.pdf)
+   - [workshop manual](03_continuous_deployment/README.md)
+   - [slides](03_continuous_deployment/slides/index.pdf)
    - [examples]()
 
    Covered: envsubst, helm, and kustomize.
