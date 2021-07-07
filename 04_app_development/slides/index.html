@@ -31,6 +31,10 @@
 							<span style="text-transform: lowercase;">wbarczynski+trainings@gmail.com</span></small>
 				</section>
 
+
+				<section data-background="img/app_smarter.png" data-background-repeat="" data-background-size="100%">
+				</section>
+
 				<section data-markdown>
 					<script type="text/template">
 #### Start
@@ -46,7 +50,7 @@
 
 1. Structured logs
 2. Liveness
-3. Liveness and readiness
+3. Readiness
 4. Prometheus metrics
 5. Zero-downtime deployment
 					</script>
@@ -60,7 +64,7 @@
 #### 12factor apps
 
 - Good to know what [12factorapp](https://12factor.net) is.
-- 12factor is not new, so you might find points obvious.
+- Not new, might look obvious.
 					</script>
 				</section>
 
@@ -72,8 +76,7 @@ Few that are very relevant for Kubernetes:
 
 1. III. [Config](https://12factor.net/config) - environment variable, injected by environment
 2. VIII. [Concurrency by process](https://12factor.net/concurrency)
-3. IX. [Disposability](https://12factor.net/disposability)
-
+3. IX. [Disposability](https://12factor.net/disposability) (MTTR vs MTTF)
 					</script>
 				</section>
 
@@ -188,7 +191,6 @@ LIVENESS AND READINESS PROBES
 					</script>
 				</section>
 
-
 				<section data-markdown>
 					<script type="text/template">
 #### R<span style="text-transform: lowercase;">eadiness</span> P<span style="text-transform: lowercase;">robe</span>
@@ -220,7 +222,6 @@ LIVENESS AND READINESS PROBES
 					</script>
 				</section>
 
-
 <!--
 ZERO DOWNTIME DEPLOYMENTS
 -->
@@ -236,7 +237,6 @@ ZERO DOWNTIME DEPLOYMENTS
 #### Y<span style="text-transform: lowercase;">our app should on stop</span>
 
 1. we get SIGTERM signal
-
 					</script>
 				</section>
 
@@ -315,6 +315,19 @@ Demos and examples of the implementation:<br /> [zero-downtime deployments](http
 					</script>
 				</section>
 
+				<section data-markdown>
+					<script type="text/template">
+## O<span style="text-transform: lowercase;">ther</span>
+
+- Important pods get their resources<br />([Quality of Service](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/), PriorityClass)
+- Our pods are not on the same node/zone<br /> ([Affinity and Anti-affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity_))
+- Ensure we have enough pods running<br /> ([Rollout Strategy](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy))
+					</script>
+				</section>
+
+<!-- https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/ -->
+
+
 <!--
 ####################
 OBSERVABILITY
@@ -333,7 +346,6 @@ OBSERVABILITY
 - tracking
 					</script>
 				</section>
-
 
 				<section>
 					<h3>Why?</h3>
@@ -407,7 +419,6 @@ What do you think?
 - ?
 					</script>
 				</section>
-
 
 				<section data-markdown>
 					<script type="text/template">
@@ -649,7 +660,6 @@ Not recommended for:
 - Prometheus naming conventions: [docs](https://prometheus.io/docs/practices/naming/)
 					</script>
 				</section>
-
 
 				<section data-markdown>
 					<script type="text/template">
