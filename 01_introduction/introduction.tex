@@ -37,7 +37,7 @@
 
 \tableofcontents
 \pagebreak
-\section{Prerequiments}
+\section{Requirements}
 
 You need to feel good with Command Line Interface. You should understand what Docker is.
 
@@ -60,7 +60,7 @@ You need to feel good with Command Line Interface. You should understand what Do
 
 \begin{markdown}
 - K3S - [github.com/k3s-io/k3s](https://github.com/k3s-io/k3s)
-- Kubernes CLI - [kubernetes.io/docs/tasks/tools/](https://kubernetes.io/docs/tasks/tools/)
+- Kubernetes CLI - [kubernetes.io/docs/tasks/tools/](https://kubernetes.io/docs/tasks/tools/)
 \end{markdown}
 
 \subsection{Verify the setup}
@@ -514,7 +514,7 @@ root@intro#$ telnet kube-dns.kube-system 53
 \end{verbatim}
 
 \bigskip
-4. Assuming we resolve our issue, let's clean up by deleting the pod we install utilites for debugging:
+4. Assuming we resolve our issue, let's clean up by deleting the pod we install utilities for debugging:
 
 \begin{verbatim}
 $ kubectl delete po intro-app-65db4-...
@@ -638,7 +638,7 @@ $ kubectl exec -it intro-app-deploy-5d556d9f4b-vslp9 \
 7. You will use ClusterIP service with Ingress controller more often than Loadbalancer service.
 
 %
-\section{Modyfing kubernetes deployment and service}
+\section{Modifying kubernetes deployment and service}
 
 Avoid editing files on kubernetes, always modify a yaml and apply the changes.
 
@@ -1016,7 +1016,7 @@ $ kubectl create configmap intro-app \
 \end{verbatim}
 
 \bigskip
-Recomendation: Keep it simple, start with env values hardcoded in deployment if the values do not change between the environments.
+Recommendation: Keep it simple, start with env values hardcoded in deployment if the values do not change between the environments.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Kubernetes secret}
@@ -1314,7 +1314,7 @@ Next course *Intermediate (Developer)*:
 2. Azure Kubernetes Service -  AKS
 3. Amazon Elastic Kubernetes - EKS
 
-Trainings and Consultancy: \email{wbarczynski.pro@gmail.com}
+Contact: \email{wbarczynski+trainings@gmail.com}
 \end{markdown}
 
 \end{document}

@@ -55,35 +55,6 @@
 					</div>
 				</section>
 
-				<section data-markdown>
-					<script type="text/template">
-<h3>P<span style="text-transform: lowercase;">rinciples</span></h3>
-
-- CD starts at the developer workstation
-- every dev and tool do things the same way ([parity](https://12factor.net/dev-prod-parity))
-					</script>
-				</section>
-
-
-
-				<section data-markdown>
-					<script type="text/template">
-<h3>B<span style="text-transform: lowercase;">asics</span></h3>
-
-- CD starts at the developer workstation
-- every dev and tool do things the same way ([parity](https://12factor.net/dev-prod-parity))
-					</script>
-				</section>
-
-
-				<section data-markdown>
-					<script type="text/template">
-<h3>B<span style="text-transform: lowercase;">asics</span></h3>
-<img src="img/everybody_the_same_way.svg" style="width:70%">
-
-<small>Makefile or your tool of choice</small>
-					</script>
-				</section>
 
 				<section data-markdown>
 					<script type="text/template">
@@ -94,6 +65,60 @@ As in developement, we fight the complexity:
 - decoupling
 - cutting dependencies
 - removing dead code
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<h3>C<span style="text-transform: lowercase;">onventions</span></h3>
+
+over tools!
+
+- Copy&paste: Makefile, .gitlab-ci.yml, README.md, Dockerfile, helm, ...
+- Change few lines
+- You are ready to go
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<h3>C<span style="text-transform: lowercase;">onventions</span></h3>
+
+over tools!
+
+- Tools also leads to rigity [*]
+- Rigity and Coupling = Complexity
+- Extracting/Discovering tools should be ongoing process
+
+<small>[*] aka shall we extract a common module?</small>
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<h3>C<span style="text-transform: lowercase;">onventions</span></h3>
+
+over tools!
+
+As many as possible steps from our CI/CD should be runnable on your laptop.
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<h3>P<span style="text-transform: lowercase;">rinciples</span></h3>
+
+- CD starts at the developer workstation
+- every dev and tool do things the same way ([parity](https://12factor.net/dev-prod-parity))
+					</script>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+<h3>B<span style="text-transform: lowercase;">asics</span></h3>
+<img src="img/everybody_the_same_way.svg" style="width:70%">
+
+<small>Makefile or your tool of choice</small>
 					</script>
 				</section>
 
