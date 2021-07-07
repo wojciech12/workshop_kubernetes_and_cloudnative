@@ -933,6 +933,9 @@ spec:
       containers:
       - name: app
         image: wojciech11/api-status:1.0.0
+        env:
+        - name: LOG_LEVEL
+          value: "INFO"
         ports:
         - containerPort: 80
         volumeMounts:
@@ -979,19 +982,19 @@ $ kubectl create configmap intro-app \
 \end{minted}
 
 \bigskip
-8. Open a console in your pods and check whether the ENV variable is set:
+8. Open a console in your pods and check whether the {\small ENV} variable is set:
 
 \begin{verbatim}
 \# printenv | grep DB_NAME
 \end{verbatim}
 
 \bigskip
-9. You may also declare all of your env variables in configmap and load all of them:
+9. You may also declare all of your {\small ENV} variables in configmap and load all of them:
 
 \begin{minted}{yaml}
       envFrom:
       - configMapRef:
-          name: db-config
+          name: intro-app-db
 \end{minted}
 
 and the corresponding configmap:
@@ -1000,19 +1003,19 @@ and the corresponding configmap:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: db-config
+  name: intro-app-db
   namespace: default
 data:
-  DB_NAME: mydb
   DB_USERNAME: myuser
+  DB_PORT: 3306
 \end{minted}
 
 also:
 
 \begin{verbatim}
-$ kubectl create configmap intro-app \
-    --from-literal=DB_NAME=mydb \
-    --from-literal=DB_USERNAME=myuser
+$ kubectl create configmap intro-app-db \
+    --from-literal=DB_USERNAME=mydb \
+    --from-literal=DB_PORT=3306
 \end{verbatim}
 
 \bigskip
@@ -1048,6 +1051,7 @@ Hint: below\footnote{\mintinline{bash}{printf nomoresecrets | base64}}
             key: db.password
 
 \end{minted}
+Open console in the pod and check whether you have the env variable with password.
 
 \bigskip
 3. Please deliver \verb|cert.crt| to your application and mount it at \verb|/usr/secret|, find how to do it find on\\ \href{https://kubernetes.io/docs/concepts/configuration/secret/}{kubernetes.io/docs/concepts/configuration/secret/} :
@@ -1060,7 +1064,7 @@ $ kubectl create secret generic intro-app-cert \
 
 %
 \section{Your own app}
-We have prepared two simple application in Python and Golang, your task is to deploy one of them on the Kubernetes cluster. Let's use docker hub for hosting our image. For this purpose please create an user on \href{https://hub.docker.com}{hub.docker.com}.
+We have prepared two simple application in Python and Golang, your task is to deploy one of them on the Kubernetes cluster. Let's use docker hub for hosting our image. For this purpose please create a user on \href{https://hub.docker.com}{hub.docker.com}.
 
 \bigskip
 Before please delete all the resources from the previous exercises:
@@ -1073,7 +1077,6 @@ $ kubectl get deploy
 $ kubectl get cm
 $ kubectl get secret
 \end{minted}
-
 
 Chose one applications (see in the \verb|exercise| directory):
 
